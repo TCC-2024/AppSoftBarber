@@ -3,7 +3,8 @@ import React, { useState } from 'react'
 import Fonts from '../../../utils/Fonts'
 import { Ionicons } from '@expo/vector-icons'
 import { auth1, db1 } from '../../../config/firebaseConfig';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
 
 export default function Cadastro({ navigation }) {
     const [showPassword, setShowPassword] = useState(false);
@@ -31,6 +32,13 @@ export default function Cadastro({ navigation }) {
                 setNome('');
                 setEmail('');
                 setSenha('');
+                sendEmailVerification(auth1.currentUser)
+                    .then(() => {
+                        Alert.alert("Verifique seu Email", 'Por favor verifique seu email para poder continuar!')
+                    })
+                    .catch((error) => {
+                        console.error("Erro ao enviar email de verificação:", error);
+                    });
 
                 navigation.navigate("Login");
             })
@@ -39,7 +47,6 @@ export default function Cadastro({ navigation }) {
                 Alert.alert(errorMessage);
             });
     }
-
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
             <View style={{ padding: 10 * 2 }}>

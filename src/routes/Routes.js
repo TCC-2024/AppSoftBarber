@@ -13,6 +13,7 @@ import Drive from "../screens/appScreens/Drive/Drive";
 import Agenda from "../screens/appScreens/Agenda/Agenda";
 import Perfil from "../screens/appScreens/Perfil/Perfil";
 import BarbeariaDetalhes from "../components/BarbeariaDetalhes";
+import EditarPerfil from "../components/EditarPerfil";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -27,6 +28,7 @@ export default function Routes() {
             <Stack.Screen name="Cadastro" component={Cadastro} />
             <Stack.Screen name="Recuperar" component={Recuperar} />
             <Stack.Screen name="BarbeariaDetalhes" component={BarbeariaDetalhes} />
+            <Stack.Screen name="EditarPerfil" component={EditarPerfil} />
             <Stack.Screen name="RoutesTab" component={RoutesTab} />
 
         </Stack.Navigator>

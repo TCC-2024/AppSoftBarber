@@ -15,10 +15,15 @@ export default function Login({ navigation }) {
         signInWithEmailAndPassword(auth1, email, senha)
             .then((userCredential) => {
                 const user = userCredential.user;
-                console.log(user);
-                setEmail("");
-                setSenha("");
-                navigation.navigate("RoutesTab");
+                if (user.emailVerified) {
+                    console.log(user);
+                    setEmail("");
+                    setSenha("");
+                    navigation.navigate("RoutesTab");
+                } else {
+                    // Se o e-mail não foi verificado, exiba uma mensagem de erro ou tome alguma outra ação
+                    Alert.alert("Erro", "Seu e-mail ainda não foi verificado. Por favor, verifique seu e-mail antes de fazer login.");
+                }
             })
             .catch((error) => {
                 const errorMessage = error.message;

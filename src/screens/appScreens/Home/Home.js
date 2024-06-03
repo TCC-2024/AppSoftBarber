@@ -15,7 +15,7 @@ export default function Home({ navigation }) {
         const fetchUserData = async () => {
             const user = auth1.currentUser;
             if (user) {
-                const userDoc = await getDoc(doc(db1, 'Users', user.uid));
+                const userDoc = await getDoc(doc(db1, "Users", user.uid));
                 if (userDoc.exists()) {
                     setNomeUser(userDoc.data().nome);
                 } else {

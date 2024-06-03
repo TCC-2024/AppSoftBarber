@@ -10,7 +10,6 @@ import {
   Switch,
   Image,
   Alert,
-  Modal,
 } from 'react-native';
 import { auth1 } from '../../../config/firebaseConfig';
 import { signOut } from 'firebase/auth';
@@ -22,11 +21,6 @@ export default function Perfil({ navigation }) {
     emailNotifications: true,
     pushNotifications: false,
   });
-  const closeModal = () => {
-    setShowSettingsModal(false);
-  };
-
-  const [showSettingsModal, setShowSettingsModal] = useState(false);
 
   const handleLogout = () => {
     Alert.alert(
@@ -57,11 +51,6 @@ export default function Perfil({ navigation }) {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
       <View style={styles.container}>
-        <View style={{ backgroundColor: colors.primary, height: 190, paddingHorizontal: 20 }}>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.headerTitle}>PERFIL</Text>
-          </View>
-        </View>
         <View style={styles.profile}>
           <TouchableOpacity
             onPress={() => {
@@ -103,7 +92,7 @@ export default function Perfil({ navigation }) {
             <Text style={styles.sectionTitle}>Preferências</Text>
 
             <TouchableOpacity
-              onPress={() => setShowSettingsModal(true)}
+              onPress={() => navigation.navigate('EditarPerfil')}
               style={styles.row}>
               <View style={[styles.rowIcon, { backgroundColor: '#8d8d8d' }]}>
                 <Ionicons color="#fff" name="settings-outline" size={20} />
@@ -232,45 +221,7 @@ export default function Perfil({ navigation }) {
           </View>
         </ScrollView>
       </View>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={showSettingsModal}
-        onRequestClose={() => setShowSettingsModal(false)}
-      >
-        <View style={styles.modalContainer}>
-          {/* Content of your settings modal */}
-          <View style={styles.modalContent}>
-            <TouchableOpacity
-              style={styles.modalButton}
-              onPress={() => {
-                // Ação ao pressionar o primeiro botão
-                console.log('Botão 1 pressionado');
-              }}
-            >
-              <Text style={styles.modalButtonText}>Opção 1</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.modalButton}
-              onPress={() => {
-                // Ação ao pressionar o segundo botão
-                console.log('Botão 2 pressionado');
-              }}
-            >
-              <Text style={styles.modalButtonText}>Opção 2</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.modalButton}
-              onPress={() => {
-                // Ação ao pressionar o terceiro botão
-                console.log('Botão 3 pressionado');
-              }}
-            >
-              <Text style={styles.modalButtonText}>Opção 3</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+
     </SafeAreaView>
   );
 }
