@@ -14,6 +14,7 @@ import {
 import { auth1 } from '../../../config/firebaseConfig';
 import { signOut } from 'firebase/auth';
 import { colors } from '../../../utils/Colors';
+import Fonts from '../../../utils/Fonts';
 
 export default function Perfil({ navigation }) {
   const [form, setForm] = useState({
@@ -63,27 +64,15 @@ export default function Perfil({ navigation }) {
                   uri: 'https://images.unsplash.com/photo-1633332755192-727a05c4013d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2.5&w=256&h=256&q=80',
                 }}
                 style={styles.profileAvatar} />
-
-              <TouchableOpacity
-                onPress={() => {
-                  // handle onPress
-                }}>
-                <View style={styles.profileAction}>
-                  <Ionicons
-                    color="#fff"
-                    name="pencil-outline"
-                    size={15} />
-                </View>
-              </TouchableOpacity>
             </View>
           </TouchableOpacity>
 
           <View>
-            <Text style={styles.profileName}>John Doe</Text>
-
-            <Text style={styles.profileAddress}>
-              123 Maple Street. Anytown, PA 17101
-            </Text>
+            <Text style={styles.profileName}>Bruno Sai</Text>
+            <View style={styles.profileAddressContainer}>
+              <Ionicons name="location-outline" size={20} color="#8d8d8d" style={{ marginTop: 6 }} />
+              <Text style={styles.profileAddress}>Localização</Text>
+            </View>
           </View>
         </View>
 
@@ -154,9 +143,7 @@ export default function Perfil({ navigation }) {
               <View style={styles.rowSpacer} />
 
               <Switch
-                onValueChange={pushNotifications =>
-                  setForm({ ...form, pushNotifications })
-                }
+                onValueChange={pushNotifications => setForm({ ...form, pushNotifications })}
                 value={form.pushNotifications} />
             </View>
           </View>
@@ -233,6 +220,10 @@ const styles = StyleSheet.create({
     flexShrink: 1,
     flexBasis: 0,
   },
+  profileAddressContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   modalContainer: {
     flex: 1,
     justifyContent: 'flex-end',
@@ -269,20 +260,9 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   profileAvatar: {
-    width: 72,
-    height: 72,
-    borderRadius: 10,
-  },
-  profileAction: {
-    position: 'absolute',
-    right: -4,
-    bottom: -10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 28,
-    height: 28,
-    borderRadius: 9999,
-    backgroundColor: '#007bff',
+    width: 99,
+    height: 99,
+    borderRadius: 999,
   },
   profileName: {
     marginTop: 20,
@@ -308,6 +288,7 @@ const styles = StyleSheet.create({
     color: '#9e9e9e',
     textTransform: 'uppercase',
     letterSpacing: 1.1,
+    fontFamily: Fonts['poppins-semiBold']
   },
   /** Row */
   row: {
@@ -316,7 +297,9 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     height: 50,
     backgroundColor: '#f2f2f2',
-    borderRadius: 8,
+    borderWidth: 0.3,
+    borderColor: '#BEBEBE',
+    borderRadius: 10,
     marginBottom: 12,
     paddingLeft: 12,
     paddingRight: 12,
@@ -331,8 +314,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   rowLabel: {
-    fontSize: 17,
-    fontWeight: '400',
+    fontSize: 15,
+    marginTop: 4.5,
+    fontFamily: Fonts['poppins-regular'],
     color: '#0c0c0c',
   },
   rowSpacer: {

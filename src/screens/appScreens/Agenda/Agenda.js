@@ -10,7 +10,7 @@ import {
 
 export default function Agenda({ navigation }) {
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: '#f6f6f6' }}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
             <View style={styles.container}>
                 <Text style={styles.title}>Agenda</Text>
 

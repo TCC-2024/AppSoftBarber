@@ -54,13 +54,13 @@ export default function Home({ navigation }) {
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: colors.white }}>
-            <StatusBar backgroundColor={colors.primary} translucent={false} barStyle="light-content" />
+            <StatusBar backgroundColor={'#000'} translucent={false} barStyle="light-content" />
             <View style={styles.header}>
                 <Text style={styles.welcomeTitle}>Olá, {nomeUser}</Text>
                 <Ionicons name='person-outline' size={28} color={colors.white} onPress={() => navigation.navigate('Perfil')} />
             </View>
             <ScrollView showsHorizontalScrollIndicator={false}>
-                <View style={{ backgroundColor: colors.primary, height: 120, paddingHorizontal: 20 }}>
+                <View style={{ backgroundColor: '#000', height: 120, paddingHorizontal: 20 }}>
                     <View style={{ flex: 1 }}>
                         <Text style={styles.headerTitle}>Explore as </Text>
                         <Text style={styles.headerTitle}>melhores barbearias</Text>
@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         flexDirection: 'row',
         justifyContent: 'space-between',
-        backgroundColor: colors.primary,
+        backgroundColor: '#000',
     },
     welcomeTitle: {
         color: colors.white,

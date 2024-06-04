@@ -28,7 +28,7 @@ export default function Card({ title, content, street, onPress }) {
                 <View style={styles.card}>
                     <Image
                         resizeMode="cover"
-                        source={require('../assets/barbershop.jpg')}
+                        source={require('../assets/images/barbershop.jpg')}
                         style={styles.cardImg}
                     />
                     <TouchableOpacity onPress={toggleFavorite} style={styles.heartButton}>

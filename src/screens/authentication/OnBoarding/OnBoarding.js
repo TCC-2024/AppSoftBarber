@@ -6,8 +6,8 @@ const { height } = Dimensions.get("window")
 export default function OnBoarding({ navigation }) {
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
-            <View style={{ marginTop: 130 }}>
-                <ImageBackground style={{ height: height / 3.5 }} resizeMode="contain" source={require("../../../assets/logopreta.png")} />
+            <View style={styles.container}>
+                <ImageBackground style={styles.image} resizeMode="contain" source={require("../../../assets/images/logopreta.png")} />
             </View>
 
             <View style={{ paddingHorizontal: 10, paddingTop: 10 * 6 }}>
@@ -34,4 +34,14 @@ export default function OnBoarding({ navigation }) {
         </SafeAreaView>
     )
 }
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+    container: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 150
+    },
+    image: {
+        width: 250,
+        height: 250,
+    },
+})

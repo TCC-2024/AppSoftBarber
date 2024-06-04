@@ -2,6 +2,7 @@ import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
+
 import Splash from "../screens/splashScreens/Splash/Splash";
 import OnBoarding from "../screens/authentication/OnBoarding/OnBoarding";
 import Login from "../screens/authentication/Login/Login";
@@ -14,6 +15,7 @@ import Agenda from "../screens/appScreens/Agenda/Agenda";
 import Perfil from "../screens/appScreens/Perfil/Perfil";
 import BarbeariaDetalhes from "../components/BarbeariaDetalhes";
 import EditarPerfil from "../components/EditarPerfil";
+import Favoritos from "../components/Favoritos";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -29,6 +31,7 @@ export default function Routes() {
             <Stack.Screen name="Recuperar" component={Recuperar} />
             <Stack.Screen name="BarbeariaDetalhes" component={BarbeariaDetalhes} />
             <Stack.Screen name="EditarPerfil" component={EditarPerfil} />
+            <Stack.Screen name="Favoritos" component={Favoritos} />
             <Stack.Screen name="RoutesTab" component={RoutesTab} />
 
         </Stack.Navigator>
