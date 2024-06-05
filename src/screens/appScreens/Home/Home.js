@@ -5,6 +5,7 @@ import { db2, db1, auth1 } from '../../../config/firebaseConfig';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../../../utils/Colors';
 import Card from '../../../components/Card';
+import Fonts from '../../../utils/Fonts';
 
 export default function Home({ navigation }) {
     const [barbearias, setBarbearias] = useState([]);
@@ -65,8 +66,8 @@ export default function Home({ navigation }) {
                         <Text style={styles.headerTitle}>Explore as </Text>
                         <Text style={styles.headerTitle}>melhores barbearias</Text>
                         <View style={styles.inputContainer}>
-                            <Ionicons name='search' size={28} />
-                            <TextInput placeholder='Buscar Barbearia' style={{ color: '#dddedd' }} />
+                            <Ionicons name='search' size={25} />
+                            <TextInput placeholder='Buscar Barbearias....' style={{ color: '#dddedd', fontFamily: Fonts['poppins-regular'], marginTop: 6, marginLeft: 9 }} />
                         </View>
                     </View>
                 </View>

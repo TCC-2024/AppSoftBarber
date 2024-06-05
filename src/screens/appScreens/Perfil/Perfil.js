@@ -296,13 +296,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-start',
     height: 50,
-    backgroundColor: '#f2f2f2',
     borderWidth: 0.3,
-    borderColor: '#BEBEBE',
-    borderRadius: 10,
     marginBottom: 12,
     paddingLeft: 12,
     paddingRight: 12,
+    fontSize: 14,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 10,
+
   },
   rowIcon: {
     width: 32,

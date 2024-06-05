@@ -1,7 +1,7 @@
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Ionicons } from "@expo/vector-icons";
+import { createBottomTabNavigator, createTab } from "@react-navigation/bottom-tabs";
+import { AntDesign } from "@expo/vector-icons";
 
 import Splash from "../screens/splashScreens/Splash/Splash";
 import OnBoarding from "../screens/authentication/OnBoarding/OnBoarding";
@@ -16,6 +16,9 @@ import Perfil from "../screens/appScreens/Perfil/Perfil";
 import BarbeariaDetalhes from "../components/BarbeariaDetalhes";
 import EditarPerfil from "../components/EditarPerfil";
 import Favoritos from "../components/Favoritos";
+import BugReportModal from "../components/BugReportModal";
+import Fonts from "../utils/Fonts";
+import { Platform, StyleSheet } from "react-native";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -32,6 +35,7 @@ export default function Routes() {
             <Stack.Screen name="BarbeariaDetalhes" component={BarbeariaDetalhes} />
             <Stack.Screen name="EditarPerfil" component={EditarPerfil} />
             <Stack.Screen name="Favoritos" component={Favoritos} />
+            <Stack.Screen name="BugReportModal" component={BugReportModal} />
             <Stack.Screen name="RoutesTab" component={RoutesTab} />
 
         </Stack.Navigator>
@@ -41,85 +45,106 @@ export default function Routes() {
 function RoutesTab() {
     return (
         <Tab.Navigator
-            initialRouteName="Home"
             screenOptions={{
-                tabBarActiveTintColor: '#000',
+                tabBarLabelStyle: styles.label,
                 headerShown: false,
-                tabBarShowLabel: false,
+                tabBarStyle: [
+                    styles.tabContainer,
+                    Platform.OS === 'ios' && {
+                        shadowOffset: { height: -2, width: 2 },
+                        shadowOpacity: 0.1,
+                        shadowRadius: 15,
+                    },
+                ],
+                tabBarItemStyle: {
+                    marginBottom: 7,
+                },
+                tabBarInactiveTintColor: 'gray',
+                tabBarActiveTintColor: '#000',
+            }}
+            safeAreaInsets={{
+                bottom: 0,
             }}
         >
             <Tab.Screen
-                name="Home"
+                name="home"
                 component={Home}
                 options={{
-                    headerShown: false,
-                    tabBarIcon: ({ color, size, focused }) => {
-                        if (focused) {
-                            return <Ionicons name="home" size={size} color={color} />;
-                        }
-
-                        return <Ionicons name="home-outline" size={size} color={color} />;
-                    },
+                    tabBarIcon: ({ focused }) => (
+                        <AntDesign
+                            name="home"
+                            size={24}
+                            color={focused ? '#000' : 'gray'}
+                        />
+                    ),
                 }}
             />
             <Tab.Screen
+                options={{
+                    tabBarIcon: ({ focused }) => (
+                        <AntDesign
+                            name="search1"
+                            size={21}
+                            color={focused ? '#000' : 'gray'}
+                        />
+                    ),
+                }}
                 name="Explorar"
                 component={Explorar}
-                options={{
-                    headerShown: false,
-                    tabBarIcon: ({ color, size, focused }) => {
-                        if (focused) {
-                            return <Ionicons name="search" size={size} color={color} />;
-                        }
-
-                        return <Ionicons name="search-outline" size={size} color={color} />;
-                    },
-                }}
             />
             <Tab.Screen
                 name="Drive"
                 component={Drive}
                 options={{
-                    headerShown: false,
-                    tabBarIcon: ({ color, size, focused }) => {
-                        if (focused) {
-                            return <Ionicons name="car" size={size} color={color} />;
-                        }
-
-                        return <Ionicons name="car-outline" size={size} color={color} />;
-                    },
+                    tabBarIcon: ({ focused }) => (
+                        <AntDesign
+                            name="car"
+                            size={22}
+                            color={focused ? '#000' : 'gray'}
+                        />
+                    ),
                 }}
             />
             <Tab.Screen
                 name="Agenda"
                 component={Agenda}
                 options={{
-                    headerShown: false,
-                    tabBarIcon: ({ color, size, focused }) => {
-                        if (focused) {
-                            return <Ionicons name="calendar" size={size} color={color} />;
-                        }
-
-                        return (
-                            <Ionicons name="calendar-outline" size={size} color={color} />
-                        );
-                    },
+                    tabBarIcon: ({ focused }) => (
+                        <AntDesign
+                            name="calendar"
+                            size={22}
+                            color={focused ? '#000' : 'gray'}
+                        />
+                    ),
                 }}
             />
             <Tab.Screen
                 name="Perfil"
                 component={Perfil}
                 options={{
-                    headerShown: false,
-                    tabBarIcon: ({ color, size, focused }) => {
-                        if (focused) {
-                            return <Ionicons name="person" size={size} color={color} />;
-                        }
-
-                        return <Ionicons name="person-outline" size={size} color={color} />;
-                    },
+                    tabBarIcon: ({ focused }) => (
+                        <AntDesign
+                            name="user"
+                            size={22}
+                            color={focused ? '#000' : 'gray'}
+                        />
+                    ),
                 }}
             />
         </Tab.Navigator>
     );
 }
+
+const styles = StyleSheet.create({
+    tabContainer: {
+        position: 'absolute',
+        width: '100%',
+        backgroundColor: '#fff',
+        height: 60,
+    },
+    label: {
+        textTransform: 'capitalize',
+        fontFamily: Fonts['poppins-regular'],
+        fontSize: 12,
+    },
+});
