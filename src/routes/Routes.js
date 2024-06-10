@@ -1,6 +1,6 @@
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
-import { createBottomTabNavigator, createTab } from "@react-navigation/bottom-tabs";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { AntDesign } from "@expo/vector-icons";
 
 import Splash from "../screens/splashScreens/Splash/Splash";
@@ -10,13 +10,11 @@ import Cadastro from "../screens/authentication/Cadastro/Cadastro";
 import Recuperar from "../screens/authentication/Login/RecoverPassword/Recuperar";
 import Home from "../screens/appScreens/Home/Home";
 import Explorar from "../screens/appScreens/Explorar/Explorar";
-import Drive from "../screens/appScreens/Drive/Drive";
 import Agenda from "../screens/appScreens/Agenda/Agenda";
 import Perfil from "../screens/appScreens/Perfil/Perfil";
 import BarbeariaDetalhes from "../components/BarbeariaDetalhes";
 import EditarPerfil from "../components/EditarPerfil";
 import Favoritos from "../components/Favoritos";
-import BugReportModal from "../components/BugReportModal";
 import Fonts from "../utils/Fonts";
 import { Platform, StyleSheet } from "react-native";
 
@@ -35,7 +33,6 @@ export default function Routes() {
             <Stack.Screen name="BarbeariaDetalhes" component={BarbeariaDetalhes} />
             <Stack.Screen name="EditarPerfil" component={EditarPerfil} />
             <Stack.Screen name="Favoritos" component={Favoritos} />
-            <Stack.Screen name="BugReportModal" component={BugReportModal} />
             <Stack.Screen name="RoutesTab" component={RoutesTab} />
 
         </Stack.Navigator>
@@ -57,7 +54,8 @@ function RoutesTab() {
                     },
                 ],
                 tabBarItemStyle: {
-                    marginBottom: 7,
+                    marginBottom: 4,
+                    marginTop: 10
                 },
                 tabBarInactiveTintColor: 'gray',
                 tabBarActiveTintColor: '#000',
@@ -91,19 +89,6 @@ function RoutesTab() {
                 }}
                 name="Explorar"
                 component={Explorar}
-            />
-            <Tab.Screen
-                name="Drive"
-                component={Drive}
-                options={{
-                    tabBarIcon: ({ focused }) => (
-                        <AntDesign
-                            name="car"
-                            size={22}
-                            color={focused ? '#000' : 'gray'}
-                        />
-                    ),
-                }}
             />
             <Tab.Screen
                 name="Agenda"

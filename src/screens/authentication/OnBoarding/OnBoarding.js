@@ -20,9 +20,9 @@ export default function OnBoarding({ navigation }) {
             }}>
 
                 <Text style={{ fontSize: 14, color: '#000', fontFamily: Fonts["poppins-regular"], textAlign: "center", marginTop: 10 * 2 }}>
-                    Explore todas as opções de barbearias do brasil inteiro!
+                    Explore todas as opções de barbearias do Brasil inteiro!
                 </Text>
-                <View style={{ paddingHorizontal: 10 * 2, paddingTop: 10 * 6 }}>
+                <View style={{ paddingHorizontal: 10 * 1, paddingTop: 10 * 3 }}>
                     <TouchableOpacity onPress={() => navigation.navigate("Login")} style={{ backgroundColor: '#000', padding: 6 * 2.0, borderRadius: 10 }}>
                         <Text style={{ fontFamily: Fonts["poppins-bold"], color: '#fff', fontSize: 18, textAlign: 'center' }}>Login</Text>
                     </TouchableOpacity>
@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
     container: {
         justifyContent: 'center',
         alignItems: 'center',
-        marginTop: 150
+        marginTop: 130
     },
     image: {
         width: 250,

@@ -1,13 +1,21 @@
 import React from 'react';
-import { View, Text, SafeAreaView, StyleSheet } from 'react-native';
+import { View, Text, SafeAreaView, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import Fonts from '../utils/Fonts';
 
 export default function Favoritos({ navigation }) {
     return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
-                <Ionicons name="arrow-back" size={24} color="black" onPress={() => navigation.goBack()} />
-                <Text style={styles.title}>Favoritos</Text>
+        <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
+            <TouchableOpacity
+                onPress={() => navigation.goBack()}
+                style={styles.backButton}
+            >
+                <Ionicons name="arrow-back" size={24} color="black" />
+            </TouchableOpacity>
+            <View style={{ padding: 20 }}>
+                <View style={{ alignItems: 'center' }}>
+                    <Text style={styles.title}>Favoritos</Text>
+                </View>
             </View>
             <View style={styles.content}>
                 <Text style={styles.emptyMessage}>Você ainda não tem nenhum item favorito.</Text>
@@ -18,30 +26,31 @@ export default function Favoritos({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-    },
-    header: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingTop: 20,
+    backButton: {
+        width: 45,
+        height: 45,
+        borderWidth: 1,
+        borderColor: "black",
+        borderRadius: 30,
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: 55,
+        marginLeft: 35,
     },
     title: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginLeft: 10,
+        fontSize: 30,
+        color: '#000',
+        fontFamily: Fonts["poppins-bold"],
+        marginVertical: 10,
     },
     content: {
-        flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
     },
     emptyMessage: {
-        fontSize: 18,
+        fontSize: 15,
         color: '#333',
         textAlign: 'center',
-        marginBottom: 20,
+        marginBottom: 90,
     },
 });

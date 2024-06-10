@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, TextInput, Alert, TouchableOpacity, Text, SafeAreaView, StyleSheet } from 'react-native';
-import { getAuth, updateEmail, updatePassword } from 'firebase/auth';
-import { getDoc, updateDoc, collection, doc } from 'firebase/firestore';
-import { db1 } from '../config/firebaseConfig';
+import { View, TextInput, Alert, TouchableOpacity, Text, SafeAreaView, StyleSheet, Modal } from 'react-native';
+import { getAuth, updateEmail, updatePassword, deleteUser } from 'firebase/auth';
+import { getDoc, updateDoc, collection, doc, deleteDoc, getFirestore } from 'firebase/firestore';
+import { auth1, db1 } from '../config/firebaseConfig';
 import Fonts from '../utils/Fonts';
 import { Ionicons } from '@expo/vector-icons';
+import Toast from 'react-native-toast-message';
 
 export default function EditarPerfil({ navigation }) {
     const [nome, setNome] = useState('');
@@ -79,12 +80,49 @@ export default function EditarPerfil({ navigation }) {
         }
     };
 
-    const deleteUser = () => {
-        deleteUser(user).then(() => {
+    const [showModal, setShowModal] = useState(false);
+    const db = getFirestore();
 
-        }).catch((error) => {
+    const handleLogout = () => {
+        setShowModal(true);
+    };
 
-        });
+    const confirmDeleteAccount = async () => {
+        setShowModal(false);
+        try {
+            const user = auth.currentUser;
+            if (user) {
+                await deleteUser(user);
+                await deleteDoc(doc(db, 'Users', user.uid));
+                console.log('Conta excluída com sucesso');
+                Toast.show({
+                    type: 'success',
+                    text1: 'Conta excluída',
+                    text2: 'Sua conta foi excluída com sucesso',
+                    position: 'bottom',
+                    visibilityTime: 3000, // 3 segundos
+                    autoHide: true,
+                });
+            } else {
+                console.log('Nenhum usuário está autenticado no momento');
+            }
+        } catch (error) {
+            console.error('Erro ao excluir conta:', error);
+            // Trate o erro aqui
+            // Exibir o toast de erro ao excluir conta
+            Toast.show({
+                type: 'error',
+                text1: 'Erro',
+                text2: 'Erro ao excluir a conta do usuário',
+                position: 'bottom',
+                visibilityTime: 3000, // 3 segundos
+                autoHide: true,
+            });
+        }
+    };
+
+    const cancelLogout = () => {
+        setShowModal(false);
     };
 
     return (
@@ -135,11 +173,26 @@ export default function EditarPerfil({ navigation }) {
                 <TouchableOpacity onPress={handleSaveAll} style={styles.saveButton}>
                     <Text style={styles.saveButtonText}>Continuar</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={{ padding: 3 }} onPress={deleteUser}>
+                <TouchableOpacity style={{ padding: 3 }} onPress={() => setShowModal(true)}>
                     <Text style={{ fontFamily: Fonts["poppins-semiBold"], color: '#ff0000', textAlign: 'center', fontSize: 14 }}>DELETAR CONTA</Text>
                 </TouchableOpacity>
             </View>
-        </SafeAreaView>
+            <Modal visible={showModal} transparent animationType="fade">
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalText}>Tem certeza de que deseja <Text style={{ color: '#ff0000' }}>DELETAR</Text> sua conta?</Text>
+                        <View style={styles.modalButtonsContainer}>
+                            <TouchableOpacity onPress={confirmDeleteAccount} style={[styles.modalButton, styles.confirmButton]}>
+                                <Text style={styles.modalButtonText}>DELETAR</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={cancelLogout} style={[styles.modalButton, styles.cancelButton]}>
+                                <Text style={styles.modalButtonText}>Cancelar</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+        </SafeAreaView >
     );
 }
 
@@ -206,5 +259,35 @@ const styles = StyleSheet.create({
         color: '#fff',
         textAlign: 'center',
         fontSize: 20,
+    },
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'flex-end',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    },
+    modalContent: {
+        backgroundColor: '#fff',
+        borderTopLeftRadius: 30,
+        borderTopRightRadius: 30,
+        padding: 25,
+    },
+    modalText: {
+        fontSize: 16,
+        marginBottom: 20,
+        textAlign: 'center',
+        fontFamily: Fonts['poppins-bold']
+    },
+    modalButton: {
+        backgroundColor: 'black',
+        borderRadius: 8,
+        paddingVertical: 12,
+        paddingHorizontal: 24,
+        marginBottom: 12,
+        alignItems: 'center',
+    },
+    modalButtonText: {
+        color: '#fff',
+        fontSize: 14,
+        fontFamily: Fonts['poppins-bold']
     },
 });

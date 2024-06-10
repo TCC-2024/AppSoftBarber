@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import {
     StyleSheet,
@@ -8,12 +7,7 @@ import {
     View,
     Image,
 } from 'react-native';
-
-const barbearias = [
-    {
-        img: 'https://plus.unsplash.com/premium_photo-1661281316103-9aef5ad47c50?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2340&q=80',
-    },
-];
+import { AntDesign } from '@expo/vector-icons';
 
 export default function Card({ title, content, street, onPress }) {
     const [isFavorite, setIsFavorite] = useState(false);
@@ -32,17 +26,13 @@ export default function Card({ title, content, street, onPress }) {
                         style={styles.cardImg}
                     />
                     <TouchableOpacity onPress={toggleFavorite} style={styles.heartButton}>
-                        <Ionicons
-                            name={isFavorite ? "heart" : "heart-outline"}
-                            size={24}
-                            color="red"
-                        />
+                        {isFavorite ? <AntDesign name="heart" size={24} color="red" /> : <AntDesign name="hearto" size={24} color="red" />}
                     </TouchableOpacity>
                     <View style={styles.cardBody}>
                         <Text style={styles.cardTag}>{title}</Text>
                         <Text style={styles.cardTitle}>{content}</Text>
                         <View style={styles.cardRow}>
-                            <Ionicons name="location" size={18} color="black" style={{ marginRight: 5 }} />
+                            <AntDesign name="enviromento" size={18} color="black" style={{ marginRight: 5 }} />
                             <Text style={styles.cardRowItemText}>{street}</Text>
                         </View>
                     </View>

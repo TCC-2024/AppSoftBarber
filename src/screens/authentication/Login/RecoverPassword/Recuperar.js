@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import {
     SafeAreaView,
     StyleSheet,
@@ -7,24 +8,31 @@ import {
     TouchableOpacity,
     Alert,
 } from "react-native";
-import React, { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
-
 import { sendPasswordResetEmail } from "firebase/auth";
-import { auth } from "../../../../config/firebaseConfig";
+import { auth1 } from "../../../../config/firebaseConfig";
 import Fonts from "../../../../utils/Fonts";
+import Toast from 'react-native-toast-message';
 
 export default function Recuperar({ navigation }) {
     const [email, setEmail] = useState("");
 
     const handleForgot = () => {
-        sendPasswordResetEmail(auth, email)
+        sendPasswordResetEmail(auth1, email)
             .then(() => {
-                console.log("Email enviado");
+                Toast.show({
+                    type: 'success',
+                    text1: 'Email Enviado',
+                    text2: 'Verifique seu email para redefinir sua senha',
+                });
             })
             .catch((error) => {
                 const errorMessage = error.message;
-                Alert.alert(errorMessage);
+                Toast.show({
+                    type: 'error',
+                    text1: 'Erro',
+                    text2: errorMessage,
+                });
             });
     };
 
@@ -38,22 +46,33 @@ export default function Recuperar({ navigation }) {
                     <Ionicons name="arrow-back" size={24} color="black" />
                 </TouchableOpacity>
                 <View style={{ alignItems: 'center' }}>
-                    <Text style={{ fontSize: 30, color: '#000', fontFamily: Fonts["poppins-bold"], marginVertical: 10 * 3 }}>Nova Senha</Text>
-                    <Text style={{ fontFamily: Fonts["poppins-regular"], marginTop: -20, fontSize: 15, maxWidth: "80%", textAlign: 'center', color: '#848484' }}>Esqueceu sua senha, Não se preocupe! Inisira o seu e-mail de cadastro e enviaremos intruções para você.</Text>
+                    <Text style={{ fontSize: 30, color: '#000', fontFamily: Fonts["poppins-bold"], marginVertical: 30 }}>Nova Senha</Text>
+                    <Text style={{ fontFamily: Fonts["poppins-regular"], marginTop: -20, fontSize: 15, maxWidth: "80%", textAlign: 'center', color: '#848484' }}>Esqueceu sua senha, não se preocupe! Insira o seu e-mail de cadastro e enviaremos instruções para você.</Text>
                 </View>
                 <View style={styles.containerinput}>
-                    <TextInput placeholder="Email" placeholderTextColor={"#626262"} style={{
-                        fontFamily: Fonts["poppins-regular"], fontSize: 14, padding: 10 * 1.7, borderWidth: 1,
-                        borderColor: "#ccc", borderRadius: 10, marginVertical: 10
-                    }} />
+                    <TextInput
+                        placeholder="Email"
+                        placeholderTextColor={"#626262"}
+                        value={email}
+                        onChangeText={setEmail}
+                        style={{
+                            fontFamily: Fonts["poppins-regular"],
+                            fontSize: 14,
+                            padding: 17,
+                            borderWidth: 1,
+                            borderColor: "#ccc",
+                            borderRadius: 10,
+                            marginVertical: 10,
+                        }}
+                    />
                 </View>
-
                 <TouchableOpacity onPress={handleForgot}>
                     <View style={styles.buttonContainer}>
-                        <Text style={styles.buttonText}>Recerber Intuções</Text>
+                        <Text style={styles.buttonText}>Receber Instruções</Text>
                     </View>
                 </TouchableOpacity>
             </View>
+            <Toast />
         </SafeAreaView>
     );
 }
@@ -95,6 +114,6 @@ const styles = StyleSheet.create({
     buttonText: {
         color: "white",
         fontSize: 20,
-        fontFamily: Fonts['poppins-bold']
+        fontFamily: Fonts['poppins-bold'],
     },
 });

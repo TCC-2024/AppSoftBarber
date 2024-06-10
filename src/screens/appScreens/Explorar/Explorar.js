@@ -1,106 +1,150 @@
-import React from 'react';
-import { SafeAreaView, StyleSheet, Text, TextInput, View, FlatList, TouchableOpacity, Image } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import React, { useEffect, useState } from 'react';
+import { SafeAreaView, StyleSheet, Text, TextInput, View, ScrollView, RefreshControl } from 'react-native';
+import { AntDesign } from '@expo/vector-icons';
 import { colors } from '../../../utils/Colors';
+import Fonts from '../../../utils/Fonts';
+import { db2 } from '../../../config/firebaseConfig';
+import { collection, onSnapshot } from 'firebase/firestore';
+import Card from '../../../components/Card';
 
-const mockData = [
-  { id: '1', name: 'Barbearia A', image: 'https://via.placeholder.com/150' },
-  { id: '2', name: 'Barbearia B', image: 'https://via.placeholder.com/150' },
-  { id: '3', name: 'Barbearia C', image: 'https://via.placeholder.com/150' },
-];
+export default function Explorar({ navigation }) {
+  const [barbearias, setBarbearias] = useState([]);
+  const [enderecos, setEnderecos] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredBarbearias, setFilteredBarbearias] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
 
-export default function Explorar() {
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadFirestoreData();
+    setRefreshing(false);
+  };
+
+  const loadFirestoreData = async () => {
+    try {
+      const barbeariasCollection = collection(db2, 'CadastroBarbearia');
+      const barbeariasSnapshot = await onSnapshot(barbeariasCollection, (querySnapshot) => {
+        const barbeariasData = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setBarbearias(barbeariasData);
+        setFilteredBarbearias(barbeariasData);
+      });
+
+      const enderecosCollection = collection(db2, 'CadastroEndereço');
+      const enderecosSnapshot = await onSnapshot(enderecosCollection, (querySnapshot) => {
+        const enderecosData = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setEnderecos(enderecosData);
+      });
+    } catch (error) {
+      console.error('Erro ao carregar dados do Firestore:', error);
+    }
+  };
+
+  useEffect(() => {
+    loadFirestoreData();
+  }, []);
+
+  const handleSearch = (text) => {
+    setSearchQuery(text);
+    if (text) {
+      const filteredData = barbearias.filter(barbearia =>
+        barbearia.nomebarbeariacadastro.toLowerCase().includes(text.toLowerCase())
+      );
+      setFilteredBarbearias(filteredData);
+    } else {
+      setFilteredBarbearias(barbearias);
+    }
+  };
+
+  const handlePress = (barbearia) => {
+    navigation.navigate('BarbeariaDetalhes', barbearia);
+  };
+
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
       <View style={styles.headerContainer}>
         <View style={{ flex: 1 }}>
           <Text style={styles.headerTitle}>Explore as</Text>
           <Text style={styles.headerTitle}>melhores barbearias</Text>
-          <View style={styles.inputContainer}>
-            <Ionicons name='search' size={24} color={colors.grey} />
-            <TextInput placeholder='Buscar por barbearias' style={styles.input} />
-          </View>
         </View>
       </View>
-      <Text style={styles.sectionTitle}>Recomendado</Text>
-      <FlatList
-        data={mockData}
-        renderItem={({ item }) => (
-          <TouchableOpacity style={styles.card}>
-            <Image source={{ uri: item.image }} style={styles.cardImage} />
-            <Text style={styles.cardText}>{item.name}</Text>
-          </TouchableOpacity>
-        )}
-        keyExtractor={item => item.id}
-        contentContainerStyle={styles.listContainer}
-      />
+      <ScrollView
+        showsHorizontalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
+        <View style={{ paddingHorizontal: 20, backgroundColor: '#000', height: 30, borderBottomEndRadius: 10, borderBottomStartRadius: 10 }}>
+          <View style={styles.inputContainer}>
+            <AntDesign name='search1' size={25} />
+            <TextInput
+              placeholder='Buscar por Barbearias'
+              style={styles.textInput}
+              value={searchQuery}
+              onChangeText={handleSearch}
+            />
+          </View>
+        </View>
+        <Text style={styles.sectionTitle}>Recomendado</Text>
+        <View style={styles.cardsContainer}>
+          {filteredBarbearias.map(barbearia => (
+            <Card
+              key={barbearia.id}
+              title={barbearia.nomebarbeariacadastro}
+              content={barbearia.sobre}
+              street={enderecos.find(endereco => endereco.id === barbearia.id)?.ruanumero || 'Endereço não encontrado'}
+              imageUrl={barbearia.imageUrl}
+              onPress={() => handlePress(barbearia)}
+            />
+          ))}
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   headerContainer: {
-    backgroundColor: colors.primary,
-    height: 180,
+    backgroundColor: colors.dark,
+    height: 130,
     paddingHorizontal: 20,
     paddingTop: 40,
   },
   headerTitle: {
     color: colors.white,
-    fontWeight: 'bold',
-    fontSize: 23,
+    fontFamily: Fonts['poppins-bold'],
+    fontSize: 22,
   },
   inputContainer: {
     height: 50,
     width: '100%',
-    backgroundColor: colors.white,
+    backgroundColor: '#f9f9f9',
     borderRadius: 10,
     flexDirection: 'row',
+    paddingHorizontal: 20,
     alignItems: 'center',
-    paddingHorizontal: 15,
-    marginTop: 10,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 1 },
-    shadowRadius: 5,
+    elevation: 15,
+    shadowColor: '#8d8d8d'
   },
-  input: {
+  textInput: {
+    color: '#000',
+    fontFamily: Fonts['poppins-regular'],
+    marginTop: 6,
+    marginLeft: 9,
     flex: 1,
-    marginLeft: 10,
-    color: colors.grey,
-    fontSize: 16,
   },
   sectionTitle: {
     marginHorizontal: 20,
     marginVertical: 20,
-    fontWeight: 'bold',
+    fontFamily: Fonts['poppins-bold'],
     fontSize: 20,
+    marginTop: 40
   },
-  listContainer: {
-    paddingHorizontal: 20,
-  },
-  card: {
-    backgroundColor: colors.white,
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 20,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 1 },
-    shadowRadius: 5,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  cardImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 15,
-  },
-  cardText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
+  cardsContainer: {
+    marginTop: -30,
+  }
 });

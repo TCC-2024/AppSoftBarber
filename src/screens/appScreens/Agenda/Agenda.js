@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
     StyleSheet,
@@ -7,6 +6,8 @@ import {
     Text,
     TouchableOpacity,
 } from 'react-native';
+import { AntDesign } from '@expo/vector-icons';
+import Fonts from '../../../utils/Fonts';
 
 export default function Agenda({ navigation }) {
     return (
@@ -15,7 +16,7 @@ export default function Agenda({ navigation }) {
                 <Text style={styles.title}>Agenda</Text>
 
                 <View style={styles.empty}>
-                    <Ionicons color="#94A3B8" name="storefront-outline" size={36} />
+                    <AntDesign name="calendar" color="#94A3B8" size={36} />
 
                     <Text style={styles.emptyTitle}>Sem agendamentos</Text>
 
@@ -30,9 +31,9 @@ export default function Agenda({ navigation }) {
                         <View style={styles.btn}>
                             <Text style={styles.btnText}>Iniciar agenda</Text>
 
-                            <Ionicons
+                            <AntDesign
+                                name="rocket1"
                                 color="#fff"
-                                name="rocket-outline"
                                 size={18}
                                 style={{ marginLeft: 12 }} />
                         </View>
@@ -53,7 +54,7 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 32,
-        fontWeight: '700',
+        fontFamily: Fonts['poppins-bold'],
         color: '#1d1d1d',
         marginBottom: 12,
     },
@@ -67,14 +68,14 @@ const styles = StyleSheet.create({
     },
     emptyTitle: {
         fontSize: 21,
-        fontWeight: '600',
+        fontFamily: Fonts['poppins-semibold'],
         color: '#000',
         marginBottom: 8,
         marginTop: 16,
     },
     emptyDescription: {
         fontSize: 15,
-        fontWeight: '500',
+        fontFamily: Fonts['poppins-regular'],
         color: '#878787',
         marginBottom: 24,
     },
@@ -93,7 +94,7 @@ const styles = StyleSheet.create({
     btnText: {
         fontSize: 17,
         lineHeight: 24,
-        fontWeight: '600',
+        fontFamily: Fonts['poppins-semibold'],
         color: '#fff',
     },
 });

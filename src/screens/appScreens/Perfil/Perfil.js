@@ -1,5 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   SafeAreaView,
@@ -9,12 +8,20 @@ import {
   TouchableOpacity,
   Switch,
   Image,
-  Alert,
+  Modal,
+  StatusBar
 } from 'react-native';
-import { auth1 } from '../../../config/firebaseConfig';
+import { auth1, db1 } from '../../../config/firebaseConfig';
 import { signOut } from 'firebase/auth';
 import { colors } from '../../../utils/Colors';
 import Fonts from '../../../utils/Fonts';
+import Toast from 'react-native-toast-message';
+import { AntDesign } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
+import { doc, getDoc, setDoc, updateDoc, onSnapshot } from 'firebase/firestore';
+import LogoutModal from '../../../components/Modals/LogoutModal';
+import ContactUsModal from '../../../components/Modals/ContactUsModal';
+import ReportBugModal from '../../../components/Modals/ReportBugModal';
 
 export default function Perfil({ navigation }) {
   const [form, setForm] = useState({
@@ -22,262 +29,313 @@ export default function Perfil({ navigation }) {
     emailNotifications: true,
     pushNotifications: false,
   });
+  const [contactUsModalVisible, setContactUsModalVisible] = useState(false);
+  const [showBugModal, setShowBugModal] = useState(false);
+  const [image, setImage] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [userDoc, setUserDoc] = useState(null);
+  const [nomeUser, setNomeUser] = useState('');
+  const [emailUser, setEmailUser] = useState('');
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const user = auth1.currentUser;
+      if (user) {
+        const userDoc = doc(db1, "Users", user.uid);
+        const unsubscribe = onSnapshot(userDoc, (doc) => {
+          if (doc.exists()) {
+            const userData = doc.data();
+            setNomeUser(userData.nome);
+            setEmailUser(userData.email);
+            setImage(userData.imageURL);
+          } else {
+            console.log("No such document!");
+          }
+        });
+        setUserDoc(userDoc);
+        return () => unsubscribe();
+      }
+    };
+
+    fetchUserData();
+  }, []);
+  const saveImageURLToFirestore = async (userId, imageURL) => {
+    try {
+      const userRef = doc(db1, 'Users', userId);
+      const docSnap = await getDoc(userRef);
+      if (docSnap.exists()) {
+        await updateDoc(userRef, {
+          imageURL: imageURL
+        });
+      } else {
+        await setDoc(userRef, {
+          imageURL: imageURL
+        });
+      }
+      console.log('URL da imagem salva com sucesso no Firestore.');
+    } catch (error) {
+      console.error('Erro ao salvar a URL da imagem no Firestore:', error);
+    }
+  };
 
   const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Tem certeza que deseja sair?',
-      [
-        {
-          text: 'Cancelar',
-          style: 'cancel',
-        },
-        {
-          text: 'Sair',
-          onPress: () => {
-            signOut(auth1).then(() => {
-              console.log('Usuário deslogado');
-              navigation.navigate('Login')
-            }).catch((error) => {
-              console.error('Erro ao fazer logout:', error.message);
-            });
-          },
-        },
-      ],
-      { cancelable: false }
-    );
+    setShowModal(true);
+  };
+
+  const confirmLogout = () => {
+    setShowModal(false);
+    signOut(auth1)
+      .then(() => {
+        console.log('Usuário deslogado');
+        navigation.navigate('Login');
+        // Exibir o toast de saída bem-sucedida
+        Toast.show({
+          type: 'success',
+          text1: 'Logout',
+          text2: 'Usuário desconectado com sucesso',
+          position: 'bottom',
+          visibilityTime: 3000, // 3 segundos
+          autoHide: true,
+        });
+      })
+      .catch((error) => {
+        console.error('Erro ao fazer logout:', error.message);
+        // Exibir o toast de erro ao sair
+        Toast.show({
+          type: 'error',
+          text1: 'Erro',
+          text2: 'Erro ao desconectar o usuário',
+          position: 'bottom',
+          visibilityTime: 3000, // 3 segundos
+          autoHide: true,
+        });
+      });
+  };
+
+  const cancelLogout = () => {
+    setShowModal(false);
+  };
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+    console.log(result);
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+      const userId = auth1.currentUser.uid;
+      await saveImageURLToFirestore(userId, result.assets[0].uri);
+    }
   };
 
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
-      <View style={styles.container}>
-        <View style={styles.profile}>
+    <SafeAreaView style={styles.container}>
+      <StatusBar translucent={false} backgroundColor='#000' barStyle="light-content" />
+      <View>
+        <Text style={styles.headerText}>Perfil</Text>
+      </View>
+      <View style={styles.profileHeader}>
+        <View style={styles.profileHeaderContent}>
           <TouchableOpacity
-            onPress={() => {
-              // handle onPress
-            }}>
+            onPress={pickImage}>
             <View style={styles.profileAvatarWrapper}>
-              <Image
-                alt=""
-                source={{
-                  uri: 'https://images.unsplash.com/photo-1633332755192-727a05c4013d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2.5&w=256&h=256&q=80',
-                }}
-                style={styles.profileAvatar} />
+              {image ? (
+                <Image source={{ uri: image }} style={styles.profileAvatar} />
+              ) : (
+                <Image source={require('../../../assets/images/padrao.jpg')} style={styles.profileAvatar} />
+              )}
             </View>
           </TouchableOpacity>
 
-          <View>
-            <Text style={styles.profileName}>Bruno Sai</Text>
-            <View style={styles.profileAddressContainer}>
-              <Ionicons name="location-outline" size={20} color="#8d8d8d" style={{ marginTop: 6 }} />
-              <Text style={styles.profileAddress}>Localização</Text>
+          <View style={styles.profileInfo}>
+            <Text style={styles.profileName}>{nomeUser}</Text>
+            <View style={styles.profileLocation}>
+              <AntDesign name="mail" size={14} color="#000" style={styles.emailIcon} />
+              <Text style={styles.profileEmail}>{emailUser}</Text>
             </View>
+          </View>
+
+          <TouchableOpacity
+            onPress={() => {
+              // handle onPress
+            }}
+            style={styles.iconContainer}>
+            <AntDesign name="ellipsis1" size={24} color="#fff" />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <View style={styles.divider} />
+
+      <ScrollView>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Preferências</Text>
+
+          <TouchableOpacity
+            onPress={() => navigation.navigate('EditarPerfil')}
+            style={styles.row}>
+            <AntDesign name="setting" size={20} color="#000" style={styles.icon} />
+            <Text style={styles.rowLabel}>Configurações</Text>
+            <View style={styles.rowSpacer} />
+            <AntDesign name="arrowright" size={20} color="#000" />
+          </TouchableOpacity>
+
+          <View style={styles.row}>
+            <AntDesign name="bulb1" size={20} color="#000" style={styles.icon} />
+            <Text style={styles.rowLabel}>Dark Mode</Text>
+            <View style={styles.rowSpacer} />
+            <CustomSwitch
+              value={form.darkMode}
+              onValueChange={(value) => setForm({ ...form, darkMode: value })}
+            />
+          </View>
+
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Favoritos')}
+            style={styles.row}>
+            <AntDesign name="hearto" size={20} color="#000" style={styles.icon} />
+            <Text style={styles.rowLabel}>Favoritos</Text>
+            <View style={styles.rowSpacer} />
+            <AntDesign name="arrowright" size={20} color="#000" />
+          </TouchableOpacity>
+
+          <View style={styles.row}>
+            <AntDesign name="bells" size={20} color="#000" style={styles.icon} />
+            <Text style={styles.rowLabel}>Notificações</Text>
+            <View style={styles.rowSpacer} />
+            <CustomSwitch
+              value={form.pushNotifications}
+              onValueChange={(value) => setForm({ ...form, pushNotifications: value })}
+            />
           </View>
         </View>
 
-        <ScrollView>
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Preferências</Text>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Recursos</Text>
 
-            <TouchableOpacity
-              onPress={() => navigation.navigate('EditarPerfil')}
-              style={styles.row}>
-              <View style={[styles.rowIcon, { backgroundColor: '#8d8d8d' }]}>
-                <Ionicons color="#fff" name="settings-outline" size={20} />
-              </View>
+          <TouchableOpacity
+            onPress={() => setShowBugModal(true)}
+            style={styles.row}>
+            <AntDesign name="tool" size={20} color="#000" style={styles.icon} />
+            <Text style={styles.rowLabel}>Reportar Bug</Text>
+            <View style={styles.rowSpacer} />
+            <AntDesign name="arrowright" size={20} color="#000" />
+          </TouchableOpacity>
 
-              <Text style={styles.rowLabel}>Configurações</Text>
+          <TouchableOpacity
+            onPress={() => setContactUsModalVisible(true)}
+            style={styles.row}>
+            <AntDesign name="phone" size={20} color="#000" style={styles.icon} />
+            <Text style={styles.rowLabel}>Contate-nos</Text>
+            <View style={styles.rowSpacer} />
+            <AntDesign name="arrowright" size={20} color="#000" />
+          </TouchableOpacity>
 
-              <View style={styles.rowSpacer} />
-
-              <Ionicons
-                color="#C6C6C6"
-                name="chevron-forward"
-                size={20} />
-            </TouchableOpacity>
-
-            <View style={styles.row}>
-              <View style={[styles.rowIcon, { backgroundColor: '#007afe' }]}>
-                <Ionicons color="#fff" name="moon" size={20} />
-              </View>
-
-              <Text style={styles.rowLabel}>Dark Mode</Text>
-
-              <View style={styles.rowSpacer} />
-
-              <Switch
-                onValueChange={darkMode => setForm({ ...form, darkMode })}
-                value={form.darkMode} />
-            </View>
-
-            <TouchableOpacity
-              onPress={() => {
-                // handle onPress
-              }}
-              style={styles.row}>
-              <View style={[styles.rowIcon, { backgroundColor: '#f12' }]}>
-                <Ionicons
-                  color="#fff"
-                  name="heart-outline"
-                  size={20} />
-              </View>
-
-              <Text style={styles.rowLabel}>Favoritos</Text>
-
-              <View style={styles.rowSpacer} />
-
-              <Ionicons
-                color="#C6C6C6"
-                name="chevron-forward"
-                size={20} />
-            </TouchableOpacity>
-
-            <View style={styles.row}>
-              <View style={[styles.rowIcon, { backgroundColor: '#38C959' }]}>
-                <Ionicons color="#fff" name="notifications-outline" size={20} />
-              </View>
-
-              <Text style={styles.rowLabel}>Push Notifications</Text>
-
-              <View style={styles.rowSpacer} />
-
-              <Switch
-                onValueChange={pushNotifications => setForm({ ...form, pushNotifications })}
-                value={form.pushNotifications} />
-            </View>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Recursos</Text>
-
-            <TouchableOpacity
-              onPress={() => {
-                // handle onPress
-              }}
-              style={styles.row}>
-              <View style={[styles.rowIcon, { backgroundColor: '#8e8d91' }]}>
-                <Ionicons color="#fff" name="flag" size={20} />
-              </View>
-
-              <Text style={styles.rowLabel}>Reportar Bug</Text>
-
-              <View style={styles.rowSpacer} />
-
-              <Ionicons
-                color="#C6C6C6"
-                name="chevron-forward"
-                size={20} />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => {
-                // handle onPress
-              }}
-              style={styles.row}>
-              <View style={[styles.rowIcon, { backgroundColor: '#007afe' }]}>
-                <Ionicons color="#fff" name="mail" size={20} />
-              </View>
-
-              <Text style={styles.rowLabel}>Contate-nos</Text>
-
-              <View style={styles.rowSpacer} />
-
-              <Ionicons
-                color="#C6C6C6"
-                name="chevron-forward"
-                size={20} />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={handleLogout}
-              style={styles.row}>
-              <View style={[styles.rowIcon, { backgroundColor: '#ff6600' }]}>
-                <Ionicons color="#fff" name="log-out-outline" size={20} />
-              </View>
-
-              <Text style={styles.rowLabel}>Sair</Text>
-
-              <View style={styles.rowSpacer} />
-
-              <Ionicons
-                color="#C6C6C6"
-                name="chevron-forward"
-                size={20} />
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-      </View>
-
+          <TouchableOpacity
+            onPress={handleLogout}
+            style={styles.row}>
+            <AntDesign name="logout" size={20} color="#000" style={styles.icon} />
+            <Text style={styles.rowLabel}>Sair</Text>
+            <View style={styles.rowSpacer} />
+            <AntDesign name="arrowright" size={20} color="#000" />
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+      <ReportBugModal visible={showBugModal} onClose={() => setShowBugModal(false)} />
+      <ContactUsModal
+        visible={contactUsModalVisible}
+        onClose={() => setContactUsModalVisible(false)}
+      />
+      <LogoutModal
+        visible={showModal}
+        onConfirm={confirmLogout}
+        onCancel={cancelLogout}
+        setShowModal={setShowModal} // Adicionando setShowModal como uma propriedade
+      />
     </SafeAreaView>
   );
 }
 
+const CustomSwitch = ({ value, onValueChange }) => {
+  return (
+    <TouchableOpacity
+      style={[styles.switchContainer, value && styles.switchActive]}
+      activeOpacity={0.8}
+      onPress={() => onValueChange(!value)}>
+      <View style={[styles.switchToggle, value && styles.switchToggleActive]} />
+    </TouchableOpacity>
+  );
+};
+
 const styles = StyleSheet.create({
   container: {
-    padding: 0,
-    flexGrow: 1,
-    flexShrink: 1,
-    flexBasis: 0,
+    flex: 1,
+    backgroundColor: '#fff',
   },
-  profileAddressContainer: {
+  headerText: {
+    fontSize: 32,
+    fontFamily: Fonts['poppins-bold'],
+    color: '#1d1d1d',
+    marginLeft: 30,
+    paddingTop: 20,
+  },
+  profileHeader: {
+    paddingBottom: 20,
+  },
+  profileHeaderContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingTop: 16,
+  },
+  profileAvatarWrapper: {
+    marginRight: 16,
+  },
+  profileAvatar: {
+    width: 74,
+    height: 74,
+    borderRadius: 52,
+  },
+  profileInfo: {
+    flex: 1,
+  },
+  profileName: {
+    fontSize: 22,
+    fontFamily: Fonts['poppins-bold'],
+    color: '#000',
+    marginBottom: -10,
+  },
+  profileLocation: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  emailIcon: {
+    marginRight: 2,
+    marginBottom: 2
   },
-  modalContent: {
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
-    padding: 20,
+  profileEmail: {
+    fontSize: 12,
+    color: '#000',
+    fontFamily: Fonts['poppins-regular'],
+    marginRight: 'auto',
   },
-  modalButton: {
-    backgroundColor: '#007bff',
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    marginBottom: 12,
-    alignItems: 'center',
-  },
-  modalButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  /** Profile */
-  profile: {
-    padding: 24,
-    backgroundColor: '#fff',
-    flexDirection: 'column',
+  iconContainer: {
+    backgroundColor: '#000',
+    borderRadius: 10,
+    padding: 8,
+    marginLeft: 8,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  profileAvatarWrapper: {
-    position: 'relative',
+  divider: {
+    height: 1,
+    backgroundColor: '#ccc',
+    marginHorizontal: 24,
   },
-  profileAvatar: {
-    width: 99,
-    height: 99,
-    borderRadius: 999,
-  },
-  profileName: {
-    marginTop: 20,
-    fontSize: 19,
-    fontWeight: '600',
-    color: '#414d63',
-    textAlign: 'center',
-  },
-  profileAddress: {
-    marginTop: 5,
-    fontSize: 16,
-    color: '#989898',
-    textAlign: 'center',
-  },
-  /** Section */
   section: {
     paddingHorizontal: 24,
   },
@@ -290,30 +348,17 @@ const styles = StyleSheet.create({
     letterSpacing: 1.1,
     fontFamily: Fonts['poppins-semiBold']
   },
-  /** Row */
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-start',
+    justifyContent: 'space-between',
     height: 50,
-    borderWidth: 0.3,
     marginBottom: 12,
     paddingLeft: 12,
     paddingRight: 12,
-    fontSize: 14,
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 10,
-
-  },
-  rowIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 9999,
-    marginRight: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   rowLabel: {
     fontSize: 15,
@@ -322,14 +367,29 @@ const styles = StyleSheet.create({
     color: '#0c0c0c',
   },
   rowSpacer: {
-    flexGrow: 1,
-    flexShrink: 1,
-    flexBasis: 0,
+    flex: 1,
   },
-  headerTitle: {
-    color: colors.white,
-    fontWeight: 'bold',
-    fontSize: 23,
-    textAlign: 'center'
+  icon: {
+    marginRight: 12,
+  },
+  switchContainer: {
+    width: 40,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#ccc',
+    justifyContent: 'center',
+    padding: 2,
+  },
+  switchActive: {
+    backgroundColor: '#4CAF50',
+  },
+  switchToggle: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: '#fff',
+  },
+  switchToggleActive: {
+    transform: [{ translateX: 20 }],
   },
 });
