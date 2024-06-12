@@ -3,8 +3,8 @@ import { View, Text, Image, StyleSheet, TouchableOpacity, SafeAreaView, TextInpu
 import { useNavigation } from '@react-navigation/native';
 import { AntDesign } from '@expo/vector-icons';
 import Fonts from '../utils/Fonts';
-import { auth1, db1, db2 } from '../config/firebaseConfig';
-import { addDoc, collection, deleteDoc, doc, onSnapshot, query, setDoc, where } from 'firebase/firestore';
+import { db1, db2 } from '../config/firebaseConfig';
+import { addDoc, collection, deleteDoc, doc, onSnapshot, query, where } from 'firebase/firestore';
 
 export default function BarbeariaDetalhes({ route }) {
     const { nomebarbeariacadastro, sobre, imageUrl, userId } = route.params;
@@ -27,28 +27,19 @@ export default function BarbeariaDetalhes({ route }) {
             setError('Por favor, adicione um comentário.');
         } else {
             try {
-                // Verifica se já existe uma avaliação para essa barbearia feita pelo usuário atual
                 const avaliacaoExistente = avaliacoes.find(avaliacao => avaliacao.barbeariaId === userId);
-
                 if (avaliacaoExistente) {
                     setError('Você já avaliou esta barbearia.');
-                    return; // Retorna para evitar a adição de uma avaliação duplicada
+                    return;
                 }
 
-                const novaAvaliacao = { barbeariaId: userId, nota, comentario }; // Adiciona o ID da barbearia
-
-                // Adiciona um novo documento à coleção "Avaliacoes"
+                const novaAvaliacao = { barbeariaId: userId, nota, comentario };
                 const docRef = await addDoc(collection(db1, 'Avaliacoes'), novaAvaliacao);
 
                 if (docRef) {
-                    // Atualiza o estado local das avaliações
                     setAvaliacoes([...avaliacoes, { ...novaAvaliacao, id: docRef.id }]);
-
-                    // Limpa o estado dos campos de avaliação e comentário
                     setNota(0);
                     setComentario('');
-
-                    // Limpa mensagens de erro
                     setError('');
                 } else {
                     throw new Error('Erro ao adicionar avaliação.');
@@ -59,11 +50,9 @@ export default function BarbeariaDetalhes({ route }) {
             }
         }
     };
-
-    // No retorno da função, certifique-se de filtrar os comentários apenas para a barbearia atual
     useEffect(() => {
         const unsubscribeAvaliacoes = onSnapshot(
-            query(collection(db1, 'Avaliacoes'), where('barbeariaId', '==', userId)), // Aqui é onde aplicamos o filtro
+            query(collection(db1, 'Avaliacoes'), where('barbeariaId', '==', userId)),
             (querySnapshot) => {
                 const avaliacoesData = querySnapshot.docs.map(doc => ({
                     id: doc.id,
@@ -72,7 +61,6 @@ export default function BarbeariaDetalhes({ route }) {
                 setAvaliacoes(avaliacoesData);
             }
         );
-
         return () => {
             unsubscribeAvaliacoes();
         };
@@ -100,8 +88,6 @@ export default function BarbeariaDetalhes({ route }) {
                 id: doc.id,
                 ...doc.data(),
             }));
-
-            // Encontrando os serviços associados ao usuário específico
             const userServicos = servicosData.find(servico => servico.userId === userId);
             if (userServicos) {
                 setServicosState(userServicos.servicos);
@@ -119,8 +105,8 @@ export default function BarbeariaDetalhes({ route }) {
     const telefoneBarbearia = telefones.find(telefone => telefone.id === userId);
     const handleExcluirAvaliacao = async (avaliacaoId) => {
         try {
-            await deleteDoc(doc(db1, 'Avaliacoes', avaliacaoId)); // Exclui o documento do Firestore
-            setAvaliacoes(avaliacoes.filter(avaliacao => avaliacao.id !== avaliacaoId)); // Remove a avaliação da lista local
+            await deleteDoc(doc(db1, 'Avaliacoes', avaliacaoId));
+            setAvaliacoes(avaliacoes.filter(avaliacao => avaliacao.id !== avaliacaoId));
         } catch (error) {
             console.error('Erro ao excluir avaliação:', error);
             setError('Ocorreu um erro ao excluir a avaliação. Por favor, tente novamente mais tarde.');
