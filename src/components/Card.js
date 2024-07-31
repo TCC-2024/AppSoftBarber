@@ -1,13 +1,13 @@
+import { AntDesign } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import {
-    StyleSheet,
-    SafeAreaView,
-    TouchableOpacity,
-    Text,
-    View,
     Image,
+    SafeAreaView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from 'react-native';
-import { AntDesign } from '@expo/vector-icons';
 
 export default function Card({ title, content, street, onPress }) {
     const [isFavorite, setIsFavorite] = useState(false);
@@ -15,6 +15,8 @@ export default function Card({ title, content, street, onPress }) {
     const toggleFavorite = () => {
         setIsFavorite(!isFavorite);
     };
+
+    const truncatedContent = content.length > 30 ? content.slice(0, 30) + '...' : content;
 
     return (
         <SafeAreaView style={{ backgroundColor: '#fff', padding: 24 }}>
@@ -30,7 +32,7 @@ export default function Card({ title, content, street, onPress }) {
                     </TouchableOpacity>
                     <View style={styles.cardBody}>
                         <Text style={styles.cardTag}>{title}</Text>
-                        <Text style={styles.cardTitle}>{content}</Text>
+                        <Text style={styles.cardTitle}>{truncatedContent}</Text>
                         <View style={styles.cardRow}>
                             <AntDesign name="enviromento" size={18} color="black" style={{ marginRight: 5 }} />
                             <Text style={styles.cardRowItemText}>{street}</Text>

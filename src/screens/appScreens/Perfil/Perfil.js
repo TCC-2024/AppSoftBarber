@@ -1,32 +1,29 @@
-import React, { useEffect, useState } from 'react';
-import {
-  StyleSheet,
-  SafeAreaView,
-  View,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  Switch,
-  Image,
-  Modal,
-  StatusBar
-} from 'react-native';
-import { auth1, db1 } from '../../../config/firebaseConfig';
-import { signOut } from 'firebase/auth';
-import { colors } from '../../../utils/Colors';
-import Fonts from '../../../utils/Fonts';
-import Toast from 'react-native-toast-message';
 import { AntDesign } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { doc, getDoc, setDoc, updateDoc, onSnapshot } from 'firebase/firestore';
-import LogoutModal from '../../../components/Modals/LogoutModal';
+import * as Notifications from 'expo-notifications'; // Importando expo-notifications
+import { signOut } from 'firebase/auth';
+import { doc, getDoc, onSnapshot, setDoc, updateDoc } from 'firebase/firestore';
+import React, { useEffect, useState } from 'react';
+import {
+  Image,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
+import Toast from 'react-native-toast-message';
 import ContactUsModal from '../../../components/Modals/ContactUsModal';
+import LogoutModal from '../../../components/Modals/LogoutModal';
 import ReportBugModal from '../../../components/Modals/ReportBugModal';
+import { auth1, db1 } from '../../../config/firebaseConfig';
+import Fonts from '../../../utils/Fonts';
 
 export default function Perfil({ navigation }) {
   const [form, setForm] = useState({
     darkMode: false,
-    emailNotifications: true,
     pushNotifications: false,
   });
   const [contactUsModalVisible, setContactUsModalVisible] = useState(false);
@@ -59,6 +56,21 @@ export default function Perfil({ navigation }) {
 
     fetchUserData();
   }, []);
+
+  useEffect(() => {
+    const requestPermissions = async () => {
+      const { status } = await Notifications.getPermissionsAsync();
+      if (status !== 'granted') {
+        const { status: newStatus } = await Notifications.requestPermissionsAsync();
+        if (newStatus !== 'granted') {
+          alert('Você precisa permitir notificações para usar este recurso!');
+        }
+      }
+    };
+
+    requestPermissions();
+  }, []);
+
   const saveImageURLToFirestore = async (userId, imageURL) => {
     try {
       const userRef = doc(db1, 'Users', userId);
@@ -88,25 +100,23 @@ export default function Perfil({ navigation }) {
       .then(() => {
         console.log('Usuário deslogado');
         navigation.navigate('Login');
-        // Exibir o toast de saída bem-sucedida
         Toast.show({
           type: 'success',
           text1: 'Logout',
           text2: 'Usuário desconectado com sucesso',
           position: 'bottom',
-          visibilityTime: 3000, // 3 segundos
+          visibilityTime: 3000,
           autoHide: true,
         });
       })
       .catch((error) => {
         console.error('Erro ao fazer logout:', error.message);
-        // Exibir o toast de erro ao sair
         Toast.show({
           type: 'error',
           text1: 'Erro',
           text2: 'Erro ao desconectar o usuário',
           position: 'bottom',
-          visibilityTime: 3000, // 3 segundos
+          visibilityTime: 3000,
           autoHide: true,
         });
       });
@@ -131,6 +141,20 @@ export default function Perfil({ navigation }) {
     }
   };
 
+  const handleNotificationToggle = async (value) => {
+    if (value) {
+      // Solicitar permissões se ativar notificações
+      const { status } = await Notifications.getPermissionsAsync();
+      if (status === 'granted') {
+        setForm({ ...form, pushNotifications: value });
+      } else {
+        alert('Você precisa permitir notificações para ativar essa opção!');
+        setForm({ ...form, pushNotifications: false });
+      }
+    } else {
+      setForm({ ...form, pushNotifications: value });
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -209,7 +233,7 @@ export default function Perfil({ navigation }) {
             <View style={styles.rowSpacer} />
             <CustomSwitch
               value={form.pushNotifications}
-              onValueChange={(value) => setForm({ ...form, pushNotifications: value })}
+              onValueChange={handleNotificationToggle}
             />
           </View>
         </View>
@@ -245,6 +269,7 @@ export default function Perfil({ navigation }) {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
       <ReportBugModal visible={showBugModal} onClose={() => setShowBugModal(false)} />
       <ContactUsModal
         visible={contactUsModalVisible}
@@ -254,7 +279,7 @@ export default function Perfil({ navigation }) {
         visible={showModal}
         onConfirm={confirmLogout}
         onCancel={cancelLogout}
-        setShowModal={setShowModal} // Adicionando setShowModal como uma propriedade
+        setShowModal={setShowModal}
       />
     </SafeAreaView>
   );

@@ -1,10 +1,10 @@
+import { Ionicons } from '@expo/vector-icons';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import React, { useState } from 'react';
 import { SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import Fonts from '../../../utils/Fonts';
-import { Ionicons } from '@expo/vector-icons';
-import { auth1 } from '../../../config/firebaseConfig';
-import { signInWithEmailAndPassword } from 'firebase/auth';
 import Toast from 'react-native-toast-message';
+import { auth1 } from '../../../config/firebaseConfig';
+import Fonts from '../../../utils/Fonts';
 
 export default function Login({ navigation }) {
     const [email, setEmail] = useState("");

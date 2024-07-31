@@ -1,44 +1,114 @@
-import React from 'react';
-import {
-    StyleSheet,
-    SafeAreaView,
-    View,
-    Text,
-    TouchableOpacity,
-} from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
-import Fonts from '../../../utils/Fonts';
+import { collection, deleteDoc, doc, getDocs, query } from 'firebase/firestore';
+import React, { useEffect, useState } from 'react';
+import { Alert, FlatList, RefreshControl, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { db2 } from '../../../config/firebaseConfig';
 
 export default function Agenda({ navigation }) {
+    const [agendamentos, setAgendamentos] = useState([]);
+    const [refreshing, setRefreshing] = useState(false);
+
+    // Função para buscar agendamentos
+    const fetchAgendamentos = async () => {
+        try {
+            const agendamentosCollection = collection(db2, 'Agendamentos');
+            const q = query(agendamentosCollection);
+
+            const querySnapshot = await getDocs(q);
+            const fetchedAgendamentos = querySnapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+            }));
+
+            console.log('Fetched agendamentos:', fetchedAgendamentos); // Log para depuração
+
+            setAgendamentos(fetchedAgendamentos);
+        } catch (error) {
+            console.error('Erro ao buscar agendamentos:', error);
+        }
+    };
+
+    // Função para refrescar a lista
+    const onRefresh = async () => {
+        setRefreshing(true);
+        await fetchAgendamentos();
+        setRefreshing(false);
+    };
+
+    // Buscar agendamentos ao montar o componente
+    useEffect(() => {
+        fetchAgendamentos();
+    }, []);
+
+    // Função para excluir um agendamento
+    const handleDelete = async (id) => {
+        Alert.alert(
+            'Excluir Agendamento',
+            'Tem certeza de que deseja excluir este agendamento?',
+            [
+                {
+                    text: 'Cancelar',
+                    style: 'cancel',
+                },
+                {
+                    text: 'Excluir',
+                    onPress: async () => {
+                        try {
+                            await deleteDoc(doc(db2, 'Agendamentos', id));
+                            setAgendamentos(agendamentos.filter((agendamento) => agendamento.id !== id));
+                            Alert.alert('Sucesso', 'Agendamento excluído com sucesso!');
+                        } catch (error) {
+                            console.error('Erro ao excluir agendamento:', error);
+                            Alert.alert('Erro', 'Não foi possível excluir o agendamento.');
+                        }
+                    },
+                },
+            ],
+            { cancelable: false }
+        );
+    };
+
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
             <View style={styles.container}>
                 <Text style={styles.title}>Agenda</Text>
 
-                <View style={styles.empty}>
-                    <AntDesign name="calendar" color="#94A3B8" size={36} />
-
-                    <Text style={styles.emptyTitle}>Sem agendamentos</Text>
-
-                    <Text style={styles.emptyDescription}>
-                        Inicie um agendamento para conferir.
-                    </Text>
-
-                    <TouchableOpacity
-                        onPress={() => {
-                            navigation.navigate('Explorar')
-                        }}>
-                        <View style={styles.btn}>
-                            <Text style={styles.btnText}>Iniciar agenda</Text>
-
-                            <AntDesign
-                                name="rocket1"
-                                color="#fff"
-                                size={18}
-                                style={{ marginLeft: 12 }} />
-                        </View>
-                    </TouchableOpacity>
-                </View>
+                {agendamentos.length === 0 ? (
+                    <View style={styles.empty}>
+                        <AntDesign name="calendar" color="#94A3B8" size={36} />
+                        <Text style={styles.emptyTitle}>Sem agendamentos</Text>
+                        <Text style={styles.emptyDescription}>Inicie um agendamento para conferir.</Text>
+                        <TouchableOpacity onPress={() => navigation.navigate('Explorar')}>
+                            <View style={styles.btn}>
+                                <Text style={styles.btnText}>Iniciar agenda</Text>
+                                <AntDesign name="rocket1" color="#fff" size={18} style={{ marginLeft: 12 }} />
+                            </View>
+                        </TouchableOpacity>
+                    </View>
+                ) : (
+                    <FlatList
+                        data={agendamentos}
+                        keyExtractor={(item) => item.id}
+                        renderItem={({ item }) => (
+                            <View style={styles.agendamentoContainer}>
+                                <View style={styles.agendamentoDetails}>
+                                    <Text style={styles.agendamentoText}>Barbearia: {item.barbearia}</Text>
+                                    <Text style={styles.agendamentoText}>Serviço: {item.servico}</Text>
+                                    <Text style={styles.agendamentoText}>Horário: {item.horario}</Text>
+                                </View>
+                                <TouchableOpacity onPress={() => handleDelete(item.id)} style={styles.deleteButton}>
+                                    <AntDesign name="delete" size={24} color="#e74c3c" />
+                                </TouchableOpacity>
+                            </View>
+                        )}
+                        refreshControl={
+                            <RefreshControl
+                                refreshing={refreshing}
+                                onRefresh={onRefresh}
+                            />
+                        }
+                    />
+                )}
             </View>
         </SafeAreaView>
     );
@@ -46,55 +116,61 @@ export default function Agenda({ navigation }) {
 
 const styles = StyleSheet.create({
     container: {
-        flexGrow: 1,
-        flexShrink: 1,
-        flexBasis: 0,
-        paddingBottom: 140,
-        padding: 24,
+        flex: 1,
+        padding: 16,
+        backgroundColor: '#fff',
     },
     title: {
-        fontSize: 32,
-        fontFamily: Fonts['poppins-bold'],
-        color: '#1d1d1d',
-        marginBottom: 12,
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginBottom: 16,
     },
-    /** Empty */
     empty: {
-        flexGrow: 1,
-        flexShrink: 1,
-        flexBasis: 0,
-        alignItems: 'center',
+        flex: 1,
         justifyContent: 'center',
+        alignItems: 'center',
     },
     emptyTitle: {
-        fontSize: 21,
-        fontFamily: Fonts['poppins-semibold'],
-        color: '#000',
-        marginBottom: 8,
+        fontSize: 18,
+        fontWeight: 'bold',
         marginTop: 16,
     },
     emptyDescription: {
-        fontSize: 15,
-        fontFamily: Fonts['poppins-regular'],
-        color: '#878787',
-        marginBottom: 24,
+        fontSize: 14,
+        color: '#666',
+        textAlign: 'center',
+        marginTop: 8,
+        marginHorizontal: 32,
     },
-    /** Button */
     btn: {
         flexDirection: 'row',
+        backgroundColor: '#3498db',
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 5,
         alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: 8,
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-        borderWidth: 1,
-        backgroundColor: '#000',
-        borderColor: '#000',
+        marginTop: 16,
     },
     btnText: {
-        fontSize: 17,
-        lineHeight: 24,
-        fontFamily: Fonts['poppins-semibold'],
         color: '#fff',
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    agendamentoContainer: {
+        padding: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: '#ddd',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    agendamentoDetails: {
+        flex: 1,
+    },
+    agendamentoText: {
+        fontSize: 16,
+    },
+    deleteButton: {
+        padding: 8,
     },
 });

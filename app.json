@@ -2,6 +2,9 @@
   "expo": {
     "name": "SoftBarber",
     "slug": "SoftBarber",
+    "permissions": [
+      "NOTIFICATIONS"
+    ],
     "plugins": [
       [
         "expo-image-picker",

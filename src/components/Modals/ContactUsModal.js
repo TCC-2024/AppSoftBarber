@@ -1,6 +1,6 @@
-import React from 'react';
-import { Modal, View, Text, TouchableOpacity, StyleSheet, Linking } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
+import React from 'react';
+import { Linking, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const ContactUsModal = ({ visible, onClose }) => {
   return (

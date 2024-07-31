@@ -1,6 +1,6 @@
-import { ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React, { useEffect } from 'react'
 import { onAuthStateChanged } from 'firebase/auth';
+import React, { useEffect } from 'react';
+import { ActivityIndicator, Image, StyleSheet, View } from 'react-native';
 import { auth1 } from '../../../config/firebaseConfig';
 
 export default function Splash({ navigation }) {

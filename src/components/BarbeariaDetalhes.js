@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, SafeAreaView, TextInput, Button, FlatList } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 import { AntDesign } from '@expo/vector-icons';
-import Fonts from '../utils/Fonts';
-import { db1, db2 } from '../config/firebaseConfig';
+import { useNavigation } from '@react-navigation/native';
 import { addDoc, collection, deleteDoc, doc, onSnapshot, query, where } from 'firebase/firestore';
+import React, { useEffect, useState } from 'react';
+import { FlatList, Image, Modal, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { db1, db2 } from '../config/firebaseConfig';
+import ServicoModal from './Modals/ServicoModal';
 
 export default function BarbeariaDetalhes({ route }) {
     const { nomebarbeariacadastro, sobre, imageUrl, userId } = route.params;
-    const navigation = useNavigation();
+    const navigation = useNavigation();  // Use useNavigation hook
 
     const [nota, setNota] = useState(0);
     const [comentario, setComentario] = useState('');
@@ -18,9 +18,66 @@ export default function BarbeariaDetalhes({ route }) {
     const [telefones, setTelefones] = useState([]);
     const [servicosState, setServicosState] = useState([]);
 
-    const handleAgendar = () => {
-        navigation.navigate('Agenda', { nomebarbeariacadastro });
+    const [modalVisible, setModalVisible] = useState(false);
+    const [selectedService, setSelectedService] = useState(null);
+
+    // Função para abrir o modal e selecionar o serviço
+    const openModal = (servico) => {
+        setSelectedService(servico);
+        setModalVisible(true);
     };
+
+    // Função para fechar o modal
+    const closeModal = () => {
+        setSelectedService(null);
+        setModalVisible(false);
+    };
+
+    useEffect(() => {
+        const unsubscribeAvaliacoes = onSnapshot(
+            query(collection(db1, 'Avaliacoes'), where('barbeariaId', '==', userId)),
+            (querySnapshot) => {
+                const avaliacoesData = querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data(),
+                }));
+                setAvaliacoes(avaliacoesData);
+            }
+        );
+        const unsubscribeEnderecos = onSnapshot(collection(db2, 'CadastroEndereço'), (querySnapshot) => {
+            const enderecosData = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data(),
+            }));
+            setEnderecos(enderecosData);
+        });
+
+        const unsubscribeTelefones = onSnapshot(collection(db2, 'UsersBarbeiros'), (querySnapshot) => {
+            const telefonesData = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data(),
+            }));
+            setTelefones(telefonesData);
+        });
+
+        const unsubscribeServicos = onSnapshot(collection(db2, 'CadastroServiços'), (querySnapshot) => {
+            const servicosData = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data(),
+            }));
+            const userServicos = servicosData.find(servico => servico.userId === userId);
+            if (userServicos) {
+                setServicosState(userServicos.servicos);
+            }
+        });
+
+        return () => {
+            unsubscribeAvaliacoes();
+            unsubscribeEnderecos();
+            unsubscribeTelefones();
+            unsubscribeServicos();
+        };
+    }, [userId]);
 
     const handleAvaliar = async () => {
         if (comentario.trim() === '') {
@@ -50,59 +107,7 @@ export default function BarbeariaDetalhes({ route }) {
             }
         }
     };
-    useEffect(() => {
-        const unsubscribeAvaliacoes = onSnapshot(
-            query(collection(db1, 'Avaliacoes'), where('barbeariaId', '==', userId)),
-            (querySnapshot) => {
-                const avaliacoesData = querySnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data(),
-                }));
-                setAvaliacoes(avaliacoesData);
-            }
-        );
-        return () => {
-            unsubscribeAvaliacoes();
-        };
-    }, [userId]);
 
-    useEffect(() => {
-        const unsubscribeEnderecos = onSnapshot(collection(db2, 'CadastroEndereço'), (querySnapshot) => {
-            const enderecosData = querySnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data(),
-            }));
-            setEnderecos(enderecosData);
-        });
-
-        const unsubscribeTelefones = onSnapshot(collection(db2, 'UsersBarbeiros'), (querySnapshot) => {
-            const telefonesData = querySnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data(),
-            }));
-            setTelefones(telefonesData);
-        });
-
-        const unsubscribeServicos = onSnapshot(collection(db2, 'CadastroServiços'), (querySnapshot) => {
-            const servicosData = querySnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data(),
-            }));
-            const userServicos = servicosData.find(servico => servico.userId === userId);
-            if (userServicos) {
-                setServicosState(userServicos.servicos);
-            }
-        });
-
-        return () => {
-            unsubscribeEnderecos();
-            unsubscribeTelefones();
-            unsubscribeServicos();
-        };
-    }, []);
-
-    const enderecoBarbearia = enderecos.find(endereco => endereco.id === userId);
-    const telefoneBarbearia = telefones.find(telefone => telefone.id === userId);
     const handleExcluirAvaliacao = async (avaliacaoId) => {
         try {
             await deleteDoc(doc(db1, 'Avaliacoes', avaliacaoId));
@@ -112,22 +117,24 @@ export default function BarbeariaDetalhes({ route }) {
             setError('Ocorreu um erro ao excluir a avaliação. Por favor, tente novamente mais tarde.');
         }
     };
+
+    const enderecoBarbearia = enderecos.find(endereco => endereco.id === userId);
+    const telefoneBarbearia = telefones.find(telefone => telefone.id === userId);
+
     const renderItem = ({ item }) => (
         <View style={styles.reviewContainer}>
             <View style={styles.reviewHeader}>
                 <Text style={styles.reviewRating}>{item.nota} estrelas</Text>
+                <TouchableOpacity onPress={() => handleExcluirAvaliacao(item.id)}>
+                    <AntDesign name="delete" size={24} color="black" />
+                </TouchableOpacity>
             </View>
             <Text style={styles.reviewComment}>{item.comentario}</Text>
-            <TouchableOpacity onPress={() => handleExcluirAvaliacao(item.id)}>
-                <Text>
-                    <AntDesign name="delete" size={24} color="black" />
-                </Text>
-            </TouchableOpacity>
         </View>
     );
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+        <SafeAreaView style={styles.container}>
             <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
                 <AntDesign name="arrowleft" size={24} color="#fff" />
             </TouchableOpacity>
@@ -168,16 +175,34 @@ export default function BarbeariaDetalhes({ route }) {
                                     <Text style={styles.servicesTitle}>Serviços</Text>
                                     {servicosState.length > 0 ? (
                                         servicosState.map((servico, index) => (
-                                            <View key={index} style={styles.serviceContainer}>
-                                                <Text style={styles.serviceText}>Serviço: {servico.servico}</Text>
-                                                <Text style={styles.serviceText}>Duração: {servico.duracao} minutos</Text>
-                                                <Text style={styles.serviceText}>Valor: R$ {servico.valor}</Text>
-                                            </View>
+                                            <TouchableOpacity key={index} style={styles.serviceCard} onPress={() => openModal(servico)}>
+                                                <View style={styles.serviceInfo}>
+                                                    <Text style={styles.serviceText}>Serviço: {servico.servico}</Text>
+                                                    <Text style={styles.serviceText}>Duração: {servico.duracao} minutos</Text>
+                                                    <Text style={styles.serviceText}>Valor: R$ {servico.valor}</Text>
+                                                </View>
+                                                <View style={styles.agendarButton}>
+                                                    <Text style={styles.buttonText}>Agendar</Text>
+                                                </View>
+                                            </TouchableOpacity>
                                         ))
                                     ) : (
                                         <Text style={styles.noServicesText}>Nenhum serviço disponível</Text>
                                     )}
                                 </View>
+                                <Modal
+                                    animationType="slide"
+                                    transparent={true}
+                                    visible={modalVisible}
+                                    onRequestClose={closeModal}
+                                >
+                                    <ServicoModal
+                                        onClose={closeModal}
+                                        servico={selectedService}
+                                        navigation={navigation}
+                                        nomeBarbearia={nomebarbeariacadastro} // Passando o nome da barbearia para o modal
+                                    />
+                                </Modal>
                                 <View style={styles.ratingContainer}>
                                     <Text style={styles.ratingTitle}>Avaliar Barbearia</Text>
                                     <View style={styles.starContainer}>
@@ -198,8 +223,8 @@ export default function BarbeariaDetalhes({ route }) {
                                         onChangeText={setComentario}
                                     />
                                     {error !== '' && <Text style={styles.errorText}>{error}</Text>}
-                                    <TouchableOpacity onPress={handleAvaliar}>
-                                        <Text style={{ fontFamily: Fonts['poppins-regular'], fontSize: 18, backgroundColor: 'black', textAlign: 'center', borderRadius: 10, color: '#fff', width: '90%', alignSelf: 'center' }}>Avaliar Barbearia</Text>
+                                    <TouchableOpacity style={styles.button} onPress={handleAvaliar}>
+                                        <Text style={styles.buttonText}>Avaliar Barbearia</Text>
                                     </TouchableOpacity>
                                 </View>
                                 <FlatList
@@ -213,14 +238,15 @@ export default function BarbeariaDetalhes({ route }) {
                 }}
                 keyExtractor={item => item.key}
             />
-            <TouchableOpacity style={styles.button} onPress={handleAgendar}>
-                <Text style={styles.buttonText}>Agendar</Text>
-            </TouchableOpacity>
         </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#fff',
+    },
     backButton: {
         position: 'absolute',
         top: 40,
@@ -267,37 +293,61 @@ const styles = StyleSheet.create({
         color: '#333',
     },
     servicesContainer: {
-        marginTop: 16,
+        padding: 20,
     },
     servicesTitle: {
-        fontSize: 20,
+        fontSize: 24,
         fontWeight: 'bold',
-        marginBottom: 8,
+        marginBottom: 10,
+    },
+    serviceCard: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: '#fff',
+        borderRadius: 10,
+        padding: 15,
+        marginBottom: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 2,
+        elevation: 2,
+    },
+    serviceInfo: {
+        flex: 1,
     },
     serviceText: {
         fontSize: 16,
-        color: '#333',
+        marginBottom: 5,
     },
-    noServicesText: {
-        fontSize: 16,
-        color: '#999',
-    },
-    button: {
-        backgroundColor: '#000',
+    agendarButton: {
+        backgroundColor: '#3498db',
         paddingVertical: 10,
-        borderRadius: 10,
-        alignItems: 'center',
-        marginBottom: 20,
-        alignSelf: 'center',
-        width: '90%',
+        paddingHorizontal: 20,
+        borderRadius: 5,
     },
     buttonText: {
         color: '#fff',
-        fontSize: 18,
-        fontFamily: Fonts['poppins-bold']
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+    noServicesText: {
+        fontSize: 16,
+        fontStyle: 'italic',
+        textAlign: 'center',
+        marginTop: 10,
+    },
+    button: {
+        backgroundColor: '#3498db',
+        paddingVertical: 12,
+        borderRadius: 10,
+        alignItems: 'center',
+        marginBottom: 20,
     },
     ratingContainer: {
         marginTop: 20,
+        paddingHorizontal: 20,
     },
     ratingTitle: {
         fontSize: 20,
@@ -311,18 +361,19 @@ const styles = StyleSheet.create({
     input: {
         borderWidth: 1,
         borderColor: '#ccc',
-        borderRadius:
-            10,
-        padding: 10,
+        borderRadius: 10,
+        padding: 12,
         marginBottom: 10,
+        fontSize: 16,
     },
     errorText: {
         color: 'red',
         marginBottom: 10,
+        textAlign: 'center',
     },
     reviewContainer: {
         marginTop: 20,
-        padding: 10,
+        padding: 16,
         backgroundColor: '#f9f9f9',
         borderRadius: 10,
         shadowColor: '#000',
@@ -334,12 +385,12 @@ const styles = StyleSheet.create({
     reviewHeader: {
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'space-between',
         marginBottom: 5,
     },
     reviewRating: {
         fontSize: 16,
         fontWeight: 'bold',
-        marginRight: 5,
     },
     reviewComment: {
         fontSize: 14,
