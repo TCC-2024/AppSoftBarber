@@ -41,32 +41,19 @@ export default function Agenda({ navigation }) {
     }, []);
 
     // Função para excluir um agendamento
-    const handleDelete = async (id) => {
-        Alert.alert(
-            'Excluir Agendamento',
-            'Tem certeza de que deseja excluir este agendamento?',
-            [
-                {
-                    text: 'Cancelar',
-                    style: 'cancel',
-                },
-                {
-                    text: 'Excluir',
-                    onPress: async () => {
-                        try {
-                            await deleteDoc(doc(db2, 'Agendamentos', id));
-                            setAgendamentos(agendamentos.filter((agendamento) => agendamento.id !== id));
-                            Alert.alert('Sucesso', 'Agendamento excluído com sucesso!');
-                        } catch (error) {
-                            console.error('Erro ao excluir agendamento:', error);
-                            Alert.alert('Erro', 'Não foi possível excluir o agendamento.');
-                        }
-                    },
-                },
-            ],
-            { cancelable: false }
-        );
+    const confirmDelete = async (id) => {
+        try {
+            await deleteDoc(doc(db2, 'Agendamentos', id));
+            setAgendamentos((prevAgendamentos) =>
+                prevAgendamentos.filter((agendamento) => agendamento.id !== id)
+            );
+            Alert.alert('Sucesso', 'Agendamento excluído com sucesso!');
+        } catch (error) {
+            console.error('Erro ao excluir agendamento:', error);
+            Alert.alert('Erro', 'Não foi possível excluir o agendamento.');
+        }
     };
+
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
@@ -96,7 +83,7 @@ export default function Agenda({ navigation }) {
                                     <Text style={styles.agendamentoText}>Serviço: {item.servico}</Text>
                                     <Text style={styles.agendamentoText}>Horário: {item.horario}</Text>
                                 </View>
-                                <TouchableOpacity onPress={() => handleDelete(item.id)} style={styles.deleteButton}>
+                                <TouchableOpacity onPress={() => confirmDelete(item.id)} style={styles.deleteButton}>
                                     <AntDesign name="delete" size={24} color="#e74c3c" />
                                 </TouchableOpacity>
                             </View>

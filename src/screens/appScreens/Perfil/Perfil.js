@@ -23,7 +23,6 @@ import Fonts from '../../../utils/Fonts';
 
 export default function Perfil({ navigation }) {
   const [form, setForm] = useState({
-    darkMode: false,
     pushNotifications: false,
   });
   const [contactUsModalVisible, setContactUsModalVisible] = useState(false);
@@ -182,14 +181,6 @@ export default function Perfil({ navigation }) {
               <Text style={styles.profileEmail}>{emailUser}</Text>
             </View>
           </View>
-
-          <TouchableOpacity
-            onPress={() => {
-              // handle onPress
-            }}
-            style={styles.iconContainer}>
-            <AntDesign name="ellipsis1" size={24} color="#fff" />
-          </TouchableOpacity>
         </View>
       </View>
 
@@ -208,24 +199,6 @@ export default function Perfil({ navigation }) {
             <AntDesign name="arrowright" size={20} color="#000" />
           </TouchableOpacity>
 
-          <View style={styles.row}>
-            <AntDesign name="bulb1" size={20} color="#000" style={styles.icon} />
-            <Text style={styles.rowLabel}>Dark Mode</Text>
-            <View style={styles.rowSpacer} />
-            <CustomSwitch
-              value={form.darkMode}
-              onValueChange={(value) => setForm({ ...form, darkMode: value })}
-            />
-          </View>
-
-          <TouchableOpacity
-            onPress={() => navigation.navigate('Favoritos')}
-            style={styles.row}>
-            <AntDesign name="hearto" size={20} color="#000" style={styles.icon} />
-            <Text style={styles.rowLabel}>Favoritos</Text>
-            <View style={styles.rowSpacer} />
-            <AntDesign name="arrowright" size={20} color="#000" />
-          </TouchableOpacity>
 
           <View style={styles.row}>
             <AntDesign name="bells" size={20} color="#000" style={styles.icon} />
@@ -332,7 +305,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontFamily: Fonts['poppins-bold'],
     color: '#000',
-    marginBottom: -10,
+    marginBottom: 0,
   },
   profileLocation: {
     flexDirection: 'row',

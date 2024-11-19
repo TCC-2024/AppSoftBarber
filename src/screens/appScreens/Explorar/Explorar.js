@@ -96,7 +96,7 @@ export default function Explorar({ navigation }) {
               key={barbearia.id}
               title={barbearia.nomebarbeariacadastro}
               content={barbearia.sobre}
-              street={enderecos.find(endereco => endereco.id === barbearia.id)?.ruanumero || 'Endereço não encontrado'}
+              street={enderecos.find(endereco => endereco.id === barbearia.id)?.rua || 'Endereço não encontrado'}
               imageUrl={barbearia.imageUrl}
               onPress={() => handlePress(barbearia)}
             />
@@ -139,10 +139,10 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     marginHorizontal: 20,
-    marginVertical: 20,
+    marginTop: 20,
+    marginBottom: 50,
     fontFamily: Fonts['poppins-bold'],
     fontSize: 20,
-    marginTop: 40
   },
   cardsContainer: {
     marginTop: -30,

@@ -146,7 +146,7 @@ export default function Home({ navigation }) {
                             key={barbearia.id}
                             title={barbearia.nomebarbeariacadastro}
                             content={barbearia.sobre}
-                            street={enderecos.find(endereco => endereco.id === barbearia.id)?.ruanumero || 'Endereço não encontrado'}
+                            street={enderecos.find(endereco => endereco.id === barbearia.id)?.rua || 'Endereço não encontrado'}
                             imageUrl={barbearia.imageUrl}
                             onPress={() => handlePress(barbearia)}
                         />
@@ -196,10 +196,10 @@ const styles = StyleSheet.create({
     },
     sectionTitle: {
         marginHorizontal: 20,
-        marginVertical: 40,
+        marginTop: 10,
+        marginBottom: 60,
         fontFamily: Fonts['poppins-bold'],
         fontSize: 20,
-        marginTop: 20
     },
     cardsContainer: {
         marginTop: -50,

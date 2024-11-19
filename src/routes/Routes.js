@@ -14,7 +14,6 @@ import Agenda from "../screens/appScreens/Agenda/Agenda";
 import Perfil from "../screens/appScreens/Perfil/Perfil";
 import BarbeariaDetalhes from "../components/BarbeariaDetalhes";
 import EditarPerfil from "../components/EditarPerfil";
-import Favoritos from "../components/Favoritos";
 import Fonts from "../utils/Fonts";
 import { Platform, StyleSheet } from "react-native";
 
@@ -32,7 +31,6 @@ export default function Routes() {
             <Stack.Screen name="Recuperar" component={Recuperar} />
             <Stack.Screen name="BarbeariaDetalhes" component={BarbeariaDetalhes} />
             <Stack.Screen name="EditarPerfil" component={EditarPerfil} />
-            <Stack.Screen name="Favoritos" component={Favoritos} />
             <Stack.Screen name="RoutesTab" component={RoutesTab} />
 
         </Stack.Navigator>

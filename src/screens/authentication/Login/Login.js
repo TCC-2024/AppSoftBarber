@@ -114,59 +114,7 @@ export default function Login({ navigation }) {
                 <TouchableOpacity style={{ padding: 10 }} onPress={() => navigation.navigate("Cadastro")}>
                     <Text style={{ fontFamily: Fonts["poppins-semiBold"], color: '#000', textAlign: 'center', fontSize: 14 }}>Não tem uma conta? Cadastre-se</Text>
                 </TouchableOpacity>
-                <View style={styles.connectWithContainer}>
-                    <View style={styles.dividerLine} />
-                    <Text style={styles.connectWithText}>Ou conecte com</Text>
-                    <View style={styles.dividerLine} />
-                </View>
-                <View style={styles.googleButtonContainer}>
-                    <TouchableOpacity style={styles.googleButton}>
-                        <Ionicons
-                            name="logo-google"
-                            size={24}
-                            color="black"
-                            style={styles.googleIcon}
-                        />
-                    </TouchableOpacity>
-                </View>
             </View>
         </SafeAreaView>
     );
 }
-
-const styles = StyleSheet.create({
-    connectWithContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-        marginHorizontal: 20,
-        marginVertical: 30,
-    },
-    dividerLine: {
-        flex: 1,
-        height: 1,
-        backgroundColor: "#ccc",
-    },
-    connectWithText: {
-        color: "#333",
-        paddingHorizontal: 10,
-        fontFamily: Fonts["poppins-regular"],
-    },
-    googleButtonContainer: {
-        alignItems: "center",
-    },
-    googleButton: {
-        backgroundColor: "#fff",
-        borderRadius: 50,
-        width: 70,
-        height: 70,
-        justifyContent: "center",
-        alignItems: "center",
-        borderWidth: 1,
-        borderColor: "black",
-    },
-    googleIcon: {
-        textAlign: "center",
-        fontSize: 35,
-    },
-});

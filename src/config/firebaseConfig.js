@@ -25,16 +25,12 @@ const firebaseConfig2 = {
 };
 
 const app1 = initializeApp(firebaseConfig1);
-export const auth1 = initializeAuth(app1, {
-    persistence: getReactNativePersistence(AsyncStorage)
-});
+export const auth1 = initializeAuth(app1);
 export const db1 = getFirestore(app1);
 export const storage = getStorage(app1);
 
 // Initialize second Firebase app
 const app2 = initializeApp(firebaseConfig2, "Segundo");
-export const auth2 = initializeAuth(app2, {
-    persistence: getReactNativePersistence(AsyncStorage)
-});
+export const auth2 = initializeAuth(app2);
 export const db2 = getFirestore(app2);
 

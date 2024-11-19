@@ -157,7 +157,7 @@ export default function BarbeariaDetalhes({ route }) {
                                     <AntDesign name="enviromento" size={24} color="#000" />
                                     {enderecoBarbearia ? (
                                         <Text style={styles.infoText}>
-                                            Rua: {enderecoBarbearia.ruanumero}, {enderecoBarbearia.cidade}, {enderecoBarbearia.estado}, {enderecoBarbearia.cep}
+                                            Rua: {enderecoBarbearia.rua}, {enderecoBarbearia.cidade}, {enderecoBarbearia.estado}, {enderecoBarbearia.cep}
                                         </Text>
                                     ) : (
                                         <Text style={styles.infoText}>Endereço não encontrado</Text>

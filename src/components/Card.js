@@ -10,12 +10,6 @@ import {
 } from 'react-native';
 
 export default function Card({ title, content, street, onPress }) {
-    const [isFavorite, setIsFavorite] = useState(false);
-
-    const toggleFavorite = () => {
-        setIsFavorite(!isFavorite);
-    };
-
     const truncatedContent = content.length > 30 ? content.slice(0, 30) + '...' : content;
 
     return (
@@ -24,12 +18,9 @@ export default function Card({ title, content, street, onPress }) {
                 <View style={styles.card}>
                     <Image
                         resizeMode="cover"
-                        source={require('../assets/images/barbershop.jpg')}
+                        source={require('../assets/images/barberpadrao.jpg')}
                         style={styles.cardImg}
                     />
-                    <TouchableOpacity onPress={toggleFavorite} style={styles.heartButton}>
-                        {isFavorite ? <AntDesign name="heart" size={24} color="red" /> : <AntDesign name="hearto" size={24} color="red" />}
-                    </TouchableOpacity>
                     <View style={styles.cardBody}>
                         <Text style={styles.cardTag}>{title}</Text>
                         <Text style={styles.cardTitle}>{truncatedContent}</Text>
