@@ -3,6 +3,7 @@ import { collection, deleteDoc, doc, getDocs, query } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { Alert, FlatList, RefreshControl, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { db2 } from '../../../config/firebaseConfig';
+import Fonts from '../../../utils/Fonts';
 
 export default function Agenda({ navigation }) {
     const [agendamentos, setAgendamentos] = useState([]);
@@ -13,32 +14,28 @@ export default function Agenda({ navigation }) {
         try {
             const agendamentosCollection = collection(db2, 'Agendamentos');
             const q = query(agendamentosCollection);
-
             const querySnapshot = await getDocs(q);
             const fetchedAgendamentos = querySnapshot.docs.map((doc) => ({
                 id: doc.id,
                 ...doc.data(),
             }));
-
-            console.log('Fetched agendamentos:', fetchedAgendamentos); // Log para depuração
-
             setAgendamentos(fetchedAgendamentos);
         } catch (error) {
             console.error('Erro ao buscar agendamentos:', error);
         }
     };
 
-    // Função para refrescar a lista
-    const onRefresh = async () => {
-        setRefreshing(true);
-        await fetchAgendamentos();
-        setRefreshing(false);
-    };
-
     // Buscar agendamentos ao montar o componente
     useEffect(() => {
         fetchAgendamentos();
     }, []);
+
+    // Função de refresh
+    const onRefresh = async () => {
+        setRefreshing(true);
+        await fetchAgendamentos(); // Recarrega os dados
+        setRefreshing(false); // Para o indicador de carregamento
+    };
 
     // Função para excluir um agendamento
     const confirmDelete = async (id) => {
@@ -53,7 +50,6 @@ export default function Agenda({ navigation }) {
             Alert.alert('Erro', 'Não foi possível excluir o agendamento.');
         }
     };
-
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
@@ -92,6 +88,7 @@ export default function Agenda({ navigation }) {
                             <RefreshControl
                                 refreshing={refreshing}
                                 onRefresh={onRefresh}
+                                colors={['#3498db']}
                             />
                         }
                     />
@@ -111,6 +108,7 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: 'bold',
         marginBottom: 16,
+        fontFamily: Fonts['poppins-bold']
     },
     empty: {
         flex: 1,
@@ -121,6 +119,7 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
         marginTop: 16,
+        fontFamily: Fonts['poppins-semiBold']
     },
     emptyDescription: {
         fontSize: 14,
@@ -128,6 +127,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginTop: 8,
         marginHorizontal: 32,
+        fontFamily: Fonts['poppins-regular']
     },
     btn: {
         flexDirection: 'row',
@@ -142,20 +142,26 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 16,
         fontWeight: 'bold',
+        fontFamily: Fonts['poppins-bold']
     },
     agendamentoContainer: {
         padding: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: '#ddd',
-        flexDirection: 'row',
+        marginBottom: 16, // Espaçamento entre os itens
+        borderRadius: 10, // Bordas arredondadas
+        flexDirection: 'row', // Layout em linha
         justifyContent: 'space-between',
         alignItems: 'center',
+        borderWidth: 1, // Adiciona uma borda
+        borderColor: '#000', // Cor da borda
     },
     agendamentoDetails: {
         flex: 1,
     },
     agendamentoText: {
         fontSize: 16,
+        color: '#333', // Cor do texto
+        fontFamily: Fonts['poppins-regular'],
+        marginBottom: 4, // Espaçamento entre as linhas
     },
     deleteButton: {
         padding: 8,
