@@ -1,9 +1,9 @@
 import { useNavigation } from '@react-navigation/native';
-import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
+import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore';
 import React, { useEffect, useState } from 'react';
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Toast from 'react-native-toast-message';
-import { auth1, db2 } from '../../config/firebaseConfig';
+import { auth1, db1, db2 } from '../../config/firebaseConfig';
 
 const ServicoModal = ({ visible, onClose, servico, nomeBarbearia }) => {
     const [selectedService, setSelectedService] = useState(servico);
@@ -17,14 +17,29 @@ const ServicoModal = ({ visible, onClose, servico, nomeBarbearia }) => {
     const handleAgendar = async (horario) => {
         try {
             const user = auth1.currentUser;
+
+            if (!user) {
+                throw new Error('Usuário não autenticado.');
+            }
+
             const userId = user.uid;
+
+            // Puxa o nome do usuário do db1
+            const userDoc = await getDoc(doc(db1, "Users", userId));
+            if (!userDoc.exists()) {
+                throw new Error('Usuário não encontrado no banco de dados.');
+            }
+
+            const userName = userDoc.data().nome; // Ajuste "nome" para o campo correto no seu DB
 
             if (!selectedService || !selectedService.servico || !nomeBarbearia) {
                 throw new Error('Nome da barbearia ou serviço não encontrado.');
             }
 
+            // Criação do documento no db2
             await setDoc(doc(db2, "Agendamentos", `${userId}_${selectedService.servico}_${horario}`), {
                 userId: userId,
+                userName: userName, // Inclui o nome do usuário
                 barbearia: nomeBarbearia,
                 servico: selectedService.servico,
                 duracao: selectedService.duracao,
